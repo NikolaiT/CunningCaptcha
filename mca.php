@@ -1,6 +1,5 @@
 <?php
 
-
 try {
     $c = new CunningCaptcha('157');
     $c->doit();
@@ -9,26 +8,32 @@ try {
     echo $exc->getMessage();
 }
 
-
 /**
- * This class basically represents just an area to draw on. It implements three
+ * This class basically represents just an area to draw on. It implements four
  * low level methods that we need to draw on the canvas:
  *  - plot_lineAA() which plots a anti-aliased line on the canvas.
  *  - plotCircleAA() plots a anti-aliased circle on the canvas.
  *  - plotEllipseRectAA() plots a anti-aliased ellipse on the canvas.
+ * 
+ * They are all taken from http://members.chello.at/easyfilter/bresenham.html, a
+ * very good site explaining these geometrical primitives and really worth a visit.
+ * Therefore, all the credits for the implementation of the algorithm go to Alois Zingl.
+ * This here is just a port to PHP.
  */
 class Canvas {
+
     protected $height, $width;
     protected $canvas = array(array()); /* Hide the canvas from the evil outside */
+
     /**
      * 
      * @param type $size
      * @param type $captcha_string
      */
-    public function __construct($height=50, $width=50) {
+    public function __construct($height = 50, $width = 50) {
         $this->height = $height;
         $this->width = $width;
-        
+
         /* Initialize the canvas to draw on */
         for ($i = 0; $i < $this->height; $i++) {
             for ($j = 0; $j < $this->width; $j++) {
@@ -36,6 +41,7 @@ class Canvas {
             }
         }
     }
+
     /**
      * 
      * @return type 2D array, which represents the canvas.
@@ -43,7 +49,7 @@ class Canvas {
     public function get_canvas() {
         return $this->canvas;
     }
-    
+
     /**
      * Sets a pixel in the canvas.
      * @param type $x0
@@ -51,7 +57,7 @@ class Canvas {
      * @param type $c
      */
     private function set_pixel($x0, $y0, $c) {
-        $c = (int)$c;
+        $c = (int) $c;
         if ($c <= 255 && $c > 0)
             $this->canvas[$y0][$x0] = "$c $c $c";
         else
@@ -227,25 +233,122 @@ class Canvas {
                 $err += $dy += $a;
             }
     }
+
+    /**
+     * Draw an anti-aliased rational quadratic Bezier segment, squared weight
+     * @param type $x0
+     * @param type $y0
+     * @param type $x1
+     * @param type $y1
+     * @param type $x2
+     * @param type $y2
+     * @param type $w
+     * @return type
+     */
+    public function plotQuadRationalBezierSegAA($x0, $y0, $x1, $y1, $x2, $y2, $w) {
+        $sx = $x2 - $x1;
+        $sy = $y2 - $y1; /* relative values for checks */
+        $dx = $x0 - $x2;
+        $dy = $y0 - $y2;
+        $xx = $x0 - $x1;
+        $yy = $y0 - $y1;
+        $xy = $xx * $sy + $yy * $sx;
+        $cur = $xx * $sy - $yy * $sx;
+        $err = 0;
+        $ed = 0;
+        $f = 0;
+
+        assert($xx * $sx <= 0.0 && $yy * $sy <= 0.0);  /* sign of gradient must not change */
+
+        if ($cur != 0.0 && $w > 0.0) { /* no straight line */
+            if ($sx * (int) $sx + $sy * (int) $sy > $xx * $xx + $yy * $yy) { /* begin with longer part */
+                $x2 = $x0;
+                $x0 -= $dx;
+                $y2 = $y0;
+                $y0 -= $dy;
+                $cur = -$cur;      /* swap P0 P2 */
+            }
+            $xx = 2.0 * (4.0 * $w * $sx * $xx + $dx * $dx);  /* differences 2nd degree */
+            $yy = 2.0 * (4.0 * $w * $sy * $yy + $dy * $dy);
+            $sx = $x0 < $x2 ? 1 : -1; /* x step direction */
+            $sy = $y0 < $y2 ? 1 : -1; /* y step direction */
+            $xy = -2.0 * $sx * $sy * (2.0 * $w * $xy + $dx * $dy);
+
+            if ($cur * $sx * $sy < 0) { /* negated curvature? */
+                $xx = -$xx;
+                $yy = -$yy;
+                $cur = -$cur;
+                $xy = -$xy;
+            }
+            $dx = 4.0 * $w * ($x1 - $x0) * $sy * $cur + $xx / 2.0 + $xy; /* differences 1st degree */
+            $dy = 4.0 * $w * ($y0 - $y1) * $sx * $cur + $yy / 2.0 + $xy;
+
+            if ($w < 0.5 && $dy > $dx) { /* flat ellipse, algorithm fails */
+                $cur = ($w + 1.0) / 2.0;
+                $w = sqrt($w);
+                $xy = 1.0 / ($w + 1.0);
+                $sx = floor(($x0 + 2.0 * $w * $x1 + $x2) * $xy / 2.0 + 0.5); /* subdivide curve in half  */
+                $sy = floor(($y0 + 2.0 * $w * $y1 + $y2) * $xy / 2.0 + 0.5);
+                $dx = floor(($w * $x1 + $x0) * $xy + 0.5);
+                $dy = floor(($y1 * $w + $y0) * $xy + 0.5);
+                $this->plotQuadRationalBezierSegAA($x0, $y0, $dx, $dy, $sx, $sy, $cur); /* plot apart */
+                $dx = floor(($w * $x1 + $x2) * $xy + 0.5);
+                $dy = floor(($y1 * $w + $y2) * $xy + 0.5);
+                return plotQuadRationalBezierSegAA($sx, $sy, $dx, $dy, $x2, $y2, $cur);
+            }
+            $err = $dx + $dy - $xy; /* error 1st step */
+            do { /* pixel loop */
+                $cur = min($dx - $xy, $xy - $dy);
+                $ed = max($dx - $xy, $xy - $dy);
+                $ed += 2 * $ed * $cur * $cur / (4. * $ed * $ed + $cur * $cur); /* approximate error distance */
+                $x1 = 255 * abs($err - $dx - $dy + $xy) / $ed; /* get blend value by pixel error */
+                if ($x1 < 256)
+                    $this->set_pixel($x0, $y0, $x1); /* plot curve */
+                if ($f = 2 * $err + $dy < 0) { /* y step */
+                    if ($y0 == $y2)
+                        return; /* last pixel -> curve finished */
+                    if ($dx - $err < $ed)
+                        $this->set_pixel($x0 + $sx, $y0, 255 * abs($dx - $err) / $ed);
+                }
+                if (2 * $err + $dx > 0) { /* x step */
+                    if ($x0 == $x2)
+                        return; /* last pixel -> curve finished */
+                    if ($err - $dy < $ed)
+                        $this->set_pixel($x0, $y0 + $sy, 255 * abs($err - $dy) / $ed);
+                    $x0 += $sx;
+                    $dx += $xy;
+                    $err += $dy += $yy;
+                }
+                if ($f) {
+                    $y0 += $sy;
+                    $dy += $xy;
+                    $err += $dx += $xx;
+                } /* y step */
+            } while ($dy < $dx); /* gradient negates -> algorithm fails */
+        }
+        $this->plot_lineAA($x0, $y0, $x2, $y2); /* plot remaining needle to end */
+    }
 }
+
 /**
  * The CunningCaptcha class draws simple catpchas and saves them as ppm files.
  */
 class CunningCaptcha extends Canvas {
+
     private $captcha_string;
-    
+
     const legal_chars = '157ZQRE';
-    
+
     /**
      * 
      * @param type $size
      * @param type $captcha_string
      */
-    function __construct($captcha_string, $height=100, $width=300) {
+    function __construct($captcha_string, $height = 100, $width = 300) {
         if (array_diff(str_split($captcha_string), str_split($this::legal_chars))) {
-                throw new InvalidCaptchaCharsException(
-                        'Your string may only use the following chars: '.$this::legal_chars
-                );
+            throw new InvalidCaptchaCharsException(
+            'Your string may only use the following chars: ' . $this::legal_chars
+            );
         }
         parent::__construct($height, $width);
         $this->height = $height;
@@ -260,7 +363,7 @@ class CunningCaptcha extends Canvas {
             var_dump(error_get_last());
             exit(1);
         }
-        
+
         /* write the ppm header */
         if (!fwrite($h, sprintf("P3\n%d %d\n255\n", $this->width, $this->height))) {
             echo('Error: fwrite ppm header failed.');
@@ -281,36 +384,37 @@ class CunningCaptcha extends Canvas {
 
     public function test() {
         $c1 = new C_1(20, 20);
-        $this->plot_char($c1->get_canvas(), 30, 60);
+        $this->plot_char($c1->get_canvas(), 30, 30);
+        $this->plotQuadRationalBezierSegAA(100, 70, 200, 30, 180, 10, 3);
     }
-    
+
     public function doit() {
         $this->test();
         $this->write_ppm_image(substr(md5($this->captcha_string), 0, 12));
     }
-    
+
     /**
      * This function inserts the char into the captcha canvas at the 
      * position specified with the delta X and delta Y offset.
      * @param type $c The character to insert. Must be an 2D array.
-     * @param int $dx The x offset where to begin plotting the char.
-     * @param int $dy the y delta.
+     * @param $$dx The x offset where to begin plotting the char.
+     * @param $$dy the y delta.
      */
     private function plot_char($c, $dx, $dy) {
-        $width = count($c[0]); $height = count($c);
-        if ($dy+$height > count($this->canvas) || $dx+$width > count($this->canvas[0])
-                || $dy < 0 || $dx < 0) {
-            return false; // Character is too big to plot in the canvas or is negative.
+        $width = count($c[0]);
+        $height = count($c);
+        if ($dy + $height > count($this->canvas) || $dx + $width > count($this->canvas[0]) || $dy < 0 || $dx < 0) {
+            return false; // Character is too big to be plottable or is negative.
         } else {
             for ($i = 0; $i < $height; $i++) {
                 for ($j = 0; $j < $width; $j++) {
-                    $this->canvas[$dy+$i][$dx+$j] = $c[$i][$j];
+                    $this->canvas[$dy + $i][$dx + $j] = $c[$i][$j];
                 }
             }
         }
         return true;
     }
-    
+
     /**
      * This function combines all the characters given by the
      * string and its order to form the captcha. There is a wide range
@@ -320,37 +424,56 @@ class CunningCaptcha extends Canvas {
      * against cracking attempts.
      */
     private function glue_characters() {
-        /*$stamp = shuffle(array(
-            new C_1(),
-            new C_5(),
-            new C_7(),
-            new C_Z(),
-            new C_E(),
-            new C_Q(),
-            new C_R()
-        ));*/
-  
+        /* $stamp = shuffle(array(
+          new C_1(),
+          new C_5(),
+          new C_7(),
+          new C_Z(),
+          new C_E(),
+          new C_Q(),
+          new C_R()
+          )); */
     }
-}   
-class InvalidCaptchaCharsException extends Exception {}
 
+}
+
+class InvalidCaptchaCharsException extends Exception {
+    
+}
 
 abstract class Character extends Canvas {
-    
+
     abstract protected function draw();
-    
-    public function __construct($height=50, $width=50) {
+
+    public function __construct($height = 50, $width = 50) {
         parent::__construct($height, $width);
         $this->draw();
     }
-    
+
     /**
      * 
-     * @param type $level 0-3 Where 0 is no noise at all and 3 is a pretty unrecognizable char^^
+     * @param $$level 0-3 Where 0 is no noise at all and 3 is a pretty unrecognizable char^^
      */
     public function apply_noise($level) {
         
     }
+
+    /*
+     * Rotate the character along the horizontal axis.
+     */
+
+    private function rotate() {
+        
+    }
+
+    /*
+     * Adds some geometrical figures to disturb evil cracking attempts ;). Not sure if this is even useful...
+     */
+
+    private function intersperse() {
+        
+    }
+
 }
 
 //
@@ -358,45 +481,60 @@ abstract class Character extends Canvas {
 //
 
 class C_1 extends Character {
+
     protected function draw() {
-        $this->plot_lineAA(0, $this->height/2, $this->width/2, 0, 3);
-        $this->plot_lineAA($this->width/2, 0, $this->width/2, $this->height, 3);
+        $this->plot_lineAA(0, $this->height / 2, $this->width / 2, 0, 3);
+        $this->plot_lineAA($this->width / 2, 0, $this->width / 2, $this->height, 3);
     }
+
 }
 
 class C_5 extends Character {
+
     protected function draw() {
         
     }
+
 }
 
 class C_7 extends Character {
+
     protected function draw() {
         
     }
+
 }
 
 class C_Z extends Character {
+
     protected function draw() {
         
     }
+
 }
 
 class C_E extends Character {
+
     protected function draw() {
         
     }
+
 }
 
 class C_Q extends Character {
+
     protected function draw() {
         
     }
+
 }
 
 class C_R extends Character {
+
     protected function draw() {
         
     }
+
 }
+
 ?>
