@@ -1,0 +1,15 @@
+[******************* Outsource in next article named "Creating your own captcha with your own font" *******************]
+<h1> Special needs </h1>
+
+Since I use my font for captchas, I will need some mechanism to blur the glyphs, change the color and rotate glyphs and implement random space between single glyphs and many more ways to harden the reverse engineering process of finding a way to crack the captcha. Cracking in this case means to map a set of pixels to a specific character. This process should become hard enough, such that the effort isn't worth it , but one should keep in mind that the resulting image shouldn't be to unrecognizable, since it frankly pisses users off, when they need to decipher them.
+Now all these anomaly-generation techniques are essiantlially affine transformation that consist of
+<ul>
+	<li> translation
+	<li> rotation
+	<li> mirroring
+	<li> scaling
+	<li> [Verschieben]
+</ul>
+
+Additionally I will implement some other noisy tools, such as randomly assigned colors, various degrees of thinkness of the splines and maybe even some pseudo geometrical figures that confuse computational cracking attempts. Of course there will also be randomly choosen spaces between the single glyphs and they might even overlap to a certain degree (That won't be a problem since I can draw the actual captcha string in a random order and each character can be seen as a logical layer).
+[***********************************************************************************************************************]

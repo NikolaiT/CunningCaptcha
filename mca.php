@@ -57,11 +57,12 @@ class Canvas {
      * @param type $c
      */
     private function set_pixel($x0, $y0, $c) {
-        $c = (int) $c;
+        $this->canvas[$y0][$x0] = "0 0 0";
+        /*$c = (int) $c;
         if ($c <= 255 && $c > 0)
             $this->canvas[$y0][$x0] = "$c $c $c";
         else
-            $this->canvas[$y0][$x0] = "0 0 0";
+            $this->canvas[$y0][$x0] = "0 0 0";*/
     }
 
     //
@@ -235,7 +236,7 @@ class Canvas {
     }
 
     /**
-     * Draw an anti-aliased rational quadratic Bezier segment, squared weight
+     * Draw an anti-aliased rational quadratic Bezier segment, squared weight.
      * @param type $x0
      * @param type $y0
      * @param type $x1
@@ -304,7 +305,8 @@ class Canvas {
                 $x1 = 255 * abs($err - $dx - $dy + $xy) / $ed; /* get blend value by pixel error */
                 if ($x1 < 256)
                     $this->set_pixel($x0, $y0, $x1); /* plot curve */
-                if ($f = 2 * $err + $dy < 0) { /* y step */
+                $f = 2 * $err + $dy;
+                if ($f < 0) { /* y step */
                     if ($y0 == $y2)
                         return; /* last pixel -> curve finished */
                     if ($dx - $err < $ed)
@@ -326,7 +328,7 @@ class Canvas {
                 } /* y step */
             } while ($dy < $dx); /* gradient negates -> algorithm fails */
         }
-        $this->plot_lineAA($x0, $y0, $x2, $y2); /* plot remaining needle to end */
+        /*$this->plot_lineAA($x0, $y0, $x2, $y2); /* plot remaining needle to end */
     }
 }
 
@@ -385,7 +387,8 @@ class CunningCaptcha extends Canvas {
     public function test() {
         $c1 = new C_1(20, 20);
         $this->plot_char($c1->get_canvas(), 30, 30);
-        $this->plotQuadRationalBezierSegAA(100, 70, 200, 30, 180, 10, 3);
+        /* public function plotQuadRationalBezierSegAA($x0, $y0, $x1, $y1, $x2, $y2, $w) */
+        $this->plotQuadRationalBezierSegAA(100, 10, 170, 60, 180, 40, 2);
     }
 
     public function doit() {
