@@ -1,3 +1,4 @@
+import collections
 import tkinter
 import math
 
@@ -142,13 +143,14 @@ class Glyph(GeometricalPrimitives):
 		except ImportError as e:
 			print('[-] Couldnt find svg parser module')
 			return False
-		
-		# Somehow ugly. Maybe design error of underlying module, maybe there
-		# are better ways to union/inject n different dicts with same keys.
+		# Proud on that one. First time I use collections ;)
+		d = collections.defaultdict(list)
 		for g in parseSVG.parse_path(fname):
-			for kw in sorted(g.keys()):
-				if g[kw]:
-					self.data[kw].extend(g[kw])
+			for k, v in g.items():
+				if v:
+					d[k].extend(v)
+		self.data = d
+		print(self.data)
 					
 	def R(self, fname):
 		self.data = {'quadratic_bezier': [], 'simple_lines': [], 'cubic_bezier': []}
