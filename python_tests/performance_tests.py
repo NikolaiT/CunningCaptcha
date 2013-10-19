@@ -1,6 +1,7 @@
 from timer import Timer
 from bezier import Bezier # Simple bezier drawing algorithm directly derived from calculus.
 from casteljau import Casteljau # Drawing curves using de Casteljau's algorithm.
+import geoprim # All geometrical primitives. Updated extensivly.
 import random
 
 # Overwrite Bezier class and Casteljau class to disable the GUI functions. We just want to 
@@ -8,7 +9,7 @@ import random
 
 # Pre calculate random points for quadratic and cubic Bézier simulation for
 # performance tests.
-NUMBER_OF_CURVES = 500
+NUMBER_OF_CURVES = 100
 
 R = random.randrange
 pp = [[(R(500), R(500)), (R(500), R(500)), (R(500), R(500))] for i in range(NUMBER_OF_CURVES)]
@@ -44,8 +45,26 @@ class CasteljauPerf(Casteljau):
 		with Timer('Testing cubic bezier curves with De Casteljau') as t:
 			for points in pp4:
 				self.draw(points)
+				
+class GeoPrimPerf(geoprim.GeometricalPrimitives):
+	def __init__(self):
+		self.test1()
+		self.test2()
+	def _plot_pixel(self, p):
+		pass # No drawing please.
+	def test1(self):
+		with Timer('Testing quadratic bezier curves with GeoPrim') as t:
+			for points in pp:
+				points = [geoprim.Point(*p) for p in points]
+				self.bezier(points, algo='direct')
+	def test2(self):
+		with Timer('Testing cubic bezier curves with GeoPrim') as t:
+			for points in pp4:
+				points = [geoprim.Point(*p) for p in points]
+				self.bezier(points, algo='direct')
 
 if __name__ == '__main__':
-	test2 = CasteljauPerf()
+	#test2 = CasteljauPerf()
 	test = BezierPerf()
+	test3 = GeoPrimPerf()
 
