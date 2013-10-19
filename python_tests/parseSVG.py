@@ -8,11 +8,14 @@
 # Site: incolumitas.com
 
 import sys
+import collections
 try:
     from lxml import etree
 except ImportError:
     sys.stderr.write('Ohh boy, it seems that you didn\'t install lxml. Try "pip install lxml"\n')
     sys.exit(0)
+    
+Point = collections.namedtuple('Point', 'x y')
 
 class InvalidGlyphShape(Exception):
     '''
@@ -82,8 +85,8 @@ def clean(**args):
     
     # Make integer coordinates ready to be rasterized.   
     for kw in keys:
-        args[kw] = [[tuple([int(float(i)) for i in p.split(',')]) for p in geo_el] for geo_el in args[kw]]
-        
+		# I bet you can't read that ;)
+        args[kw] = [[Point(*[int(float(i)) for i in p.split(',')]) for p in geo_el] for geo_el in args[kw]]
     return args
             
 # print the glyph data.
