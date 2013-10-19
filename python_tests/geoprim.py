@@ -14,11 +14,16 @@ class GeometricalPrimitives(tkinter.Canvas):
 	Date: 13.10.2013
 	'''
 	
+	_NUM_SEGMENTS = 10
+	_STEP = 0.001
+	
 	# Because Canvas doesn't support simple pixel plotting,
 	# we need to help us out with a line with length 1 in
 	# positive x direction.
-	def _plot_pixel(self, p):
-		self.create_line(p.x, p.y, p.x+1, p.y)
+	# Coordinates as arguemnts because point namedtuples
+	# are too slow.
+	def _plot_pixel(self, x, y):
+		self.create_line(x, y, x+1, y) # This may be slow. In a real world implementation, this is ways faster.
 
 	def _draw_quadratic_bez(self, p1, p2, p3):
 		t = 0
@@ -26,8 +31,9 @@ class GeometricalPrimitives(tkinter.Canvas):
 			t2 = t*t
 			mt = t-1
 			mt2 = mt*mt
-			self._plot_pixel(Point(p1.x*mt2 + p2.x*2*mt*t + p3.x*t2, p1.y*mt2 + p2.y*2*mt*t + p3.y*t2))
-			t += 0.001
+			x, y = p1.x*mt2 + p2.x*2*mt*t + p3.x*t2, p1.y*mt2 + p2.y*2*mt*t + p3.y*t2
+			self._plot_pixel(x, y)
+			t += self._STEP
 	
 	def _draw_cubic_bez(self, p1, p2, p3, p4):
 		t = 0
@@ -37,9 +43,39 @@ class GeometricalPrimitives(tkinter.Canvas):
 			mt = 1-t
 			mt2 = mt * mt
 			mt3 = mt2 * mt
-			self._plot_pixel(Point(p1.x*mt3 + 3*p2.x*mt2*t + 3*p3.x*mt*t2 + p4.x*t3,
-										p1.y*mt3 + 3*p2.y*mt2*t + 3*p3.y*mt*t2 + p4.y*t3))
-			t += 0.001
+			x, y = p1.x*mt3 + 3*p2.x*mt2*t + 3*p3.x*mt*t2 + p4.x*t3, p1.y*mt3 + 3*p2.y*mt2*t + 3*p3.y*mt*t2 + p4.y*t3
+			self._plot_pixel(x, y)
+			t += self._STEP
+			
+	def _approx_quadratic_bez(self, p1, p2, p3):
+		lp = []
+		lp.append(p1)
+		for i in range(self._NUM_SEGMENTS):
+			t = i / self._NUM_SEGMENTS
+			t2 = t*t
+			mt = t-1
+			mt2 = mt*mt
+			x, y = p1.x*mt2 + p2.x*2*mt*t + p3.x*t2, p1.y*mt2 + p2.y*2*mt*t + p3.y*t2
+			lp.append(Point(x,y))
+			
+		for i in range(len(lp)-1):
+			self.line([lp[i], lp[i+1]])
+		
+	def _approx_cubic_bez(self, p1, p2, p3):
+		lp = []
+		lp.append(p1)
+		for i in range(self._NUM_SEGMENTS):
+			t = i / self._NUM_SEGMENTS
+			t2 = t * t
+			t3 = t2 * t
+			mt = 1-t
+			mt2 = mt * mt
+			mt3 = mt2 * mt
+			x, y = p1.x*mt3 + 3*p2.x*mt2*t + 3*p3.x*mt*t2 + p4.x*t3, p1.y*mt3 + 3*p2.y*mt2*t + 3*p3.y*mt*t2 + p4.y*t3
+			lp.append(Point(x,y))
+			
+		for i in range(len(lp)-1):
+			self.line([lp[i], lp[i+1]])
 			
 	def _casteljau(self, points, t):
 		# Check that input parameters are valid. We don't check wheter 
@@ -62,7 +98,7 @@ class GeometricalPrimitives(tkinter.Canvas):
 		t = 0
 		while (t <= 1):
 			self._casteljau(points, t)
-			t += 0.001
+			t += self._STEP
 			
 	# Usage function for drawing Bézier curves
 	# - The var algo is a string indicating the algorithm to use.
@@ -75,9 +111,9 @@ class GeometricalPrimitives(tkinter.Canvas):
 			self._draw_casteljau(points)
 		elif algo == 'direct':
 			if (len(points) == 3):
-				self._draw_quadratic_bez(*points)
+				self._approx_quadratic_bez(*points)
 			elif (len(points) == 4):
-				self._draw_cubic_bez(*points)
+				self._approx_cubic_bez(*points)
 			else:
 				raise Exception('Direct approach draws only quadratic and cubic Béziers')
 				
@@ -97,7 +133,7 @@ class GeometricalPrimitives(tkinter.Canvas):
 		err = dx+dy
 		e2 = 1
 		while (True):
-			self._plot_pixel(Point(x0, y0))
+			self._plot_pixel(x0, y0)
 			if (x0==x1 and y0==y1):
 				break
 			e2 = 2*err

@@ -9,11 +9,12 @@ import random
 
 # Pre calculate random points for quadratic and cubic Bézier simulation for
 # performance tests.
-NUMBER_OF_CURVES = 100
+NUMBER_OF_CURVES = 500
 
 R = random.randrange
-pp = [[(R(500), R(500)), (R(500), R(500)), (R(500), R(500))] for i in range(NUMBER_OF_CURVES)]
-pp4 = [[(R(500), R(500)), (R(500), R(500)), (R(500), R(500)), (R(500), R(500))] for i in range(NUMBER_OF_CURVES)]
+P = geoprim.Point
+pp = [[P(R(500), R(500)), P(R(500), R(500)), P(R(500), R(500))] for i in range(NUMBER_OF_CURVES)]
+pp4 = [[P(R(500), R(500)), P(R(500), R(500)), P(R(500), R(500)), P(R(500), R(500))] for i in range(NUMBER_OF_CURVES)]
 
 class BezierPerf(Bezier):
 	def __init__(self):
@@ -50,21 +51,19 @@ class GeoPrimPerf(geoprim.GeometricalPrimitives):
 	def __init__(self):
 		self.test1()
 		self.test2()
-	def _plot_pixel(self, p):
+	def _plot_pixel(self, x, y):
 		pass # No drawing please.
 	def test1(self):
 		with Timer('Testing quadratic bezier curves with GeoPrim') as t:
 			for points in pp:
-				points = [geoprim.Point(*p) for p in points]
 				self.bezier(points, algo='direct')
 	def test2(self):
 		with Timer('Testing cubic bezier curves with GeoPrim') as t:
 			for points in pp4:
-				points = [geoprim.Point(*p) for p in points]
 				self.bezier(points, algo='direct')
 
 if __name__ == '__main__':
 	#test2 = CasteljauPerf()
 	test = BezierPerf()
-	test3 = GeoPrimPerf()
+	test3 = GeoPrimPerf() # fastest
 

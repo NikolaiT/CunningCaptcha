@@ -22,7 +22,7 @@ class Bezier(tkinter.Canvas):
         t2 = t * t 
         mt = 1-t
         mt2 = mt * mt
-        return w[0]*mt2 + w[1]*2*mt*t + w[2]*2
+        return w[0]*mt2 + w[1]*2*mt*t + w[2]*t2
         
     # Calculates the cubic Bézier polynomial for 
     # the n+1=4 coordinates.
