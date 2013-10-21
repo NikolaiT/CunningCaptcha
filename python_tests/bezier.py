@@ -22,7 +22,7 @@ class Bezier(tkinter.Canvas):
         t2 = t * t 
         mt = 1-t
         mt2 = mt * mt
-        return w[0]*mt2 + w[1]*2*mt*t + w[2]*t2
+        return int(w[0]*mt2 + w[1]*2*mt*t + w[2]*t2)
         
     # Calculates the cubic Bézier polynomial for 
     # the n+1=4 coordinates.
@@ -32,7 +32,7 @@ class Bezier(tkinter.Canvas):
         mt = 1-t
         mt2 = mt * mt
         mt3 = mt2 * mt
-        return w[0]*mt3 + 3*w[1]*mt2*t + 3*w[2]*mt*t2 + w[3]*t3
+        return int(w[0]*mt3 + 3*w[1]*mt2*t + 3*w[2]*mt*t2 + w[3]*t3)
 
     def draw_quadratic_bez(self, p1, p2, p3):
         t = 0

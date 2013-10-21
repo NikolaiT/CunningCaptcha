@@ -1,0 +1,7 @@
+[+] Testing task is to draw 500 randomly generated Bézier splines with different algorithms. Approximation uses 15 segments.
+[!] Testing quadratic bezier curves with De Casteljau - elapsed time: 8794.471264 ms
+[!] Testing cubic bezier curves with De Casteljau - elapsed time: 13827.721834 ms
+[!] Testing quadratic bezier with direct approach - elapsed time: 2476.505518 ms
+[!] Testing cubic curves with direct approach - elapsed time: 3497.693062 ms
+[!] Testing quadratic bezier curves with GeoPrim - elapsed time: 221.125364 ms
+[!] Testing cubic bezier curves with GeoPrim - elapsed time: 251.621008 ms

@@ -44,7 +44,7 @@ class Glyph(geoprim.GeometricalPrimitives):
 		for kw in sorted(self.data.keys()):
 			if kw in ('cubic_bezier', 'quadratic_bezier'):
 				for spline in self.data[kw]:
-					self.bezier(spline, 'direct')
+					self.bezier(spline, 'approx')
 			elif kw == 'simple_lines':
 				for line in self.data[kw]:
 					self.line(line)
