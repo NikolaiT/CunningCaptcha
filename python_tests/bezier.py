@@ -49,7 +49,7 @@ class Bezier(tkinter.Canvas):
         while (t < 1):
             x = self.cubic_bezier_sum(t, (p1[0], p2[0], p3[0], p4[0]))
             y = self.cubic_bezier_sum(t, (p1[1], p2[1], p3[1], p4[1]))
-            self.plot_pixel(math.floor(x), math.floor(y))
+            self.plot_pixel(x, y)
             t += 0.001
     
 

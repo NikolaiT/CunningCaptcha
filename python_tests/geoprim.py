@@ -199,6 +199,6 @@ if __name__ == '__main__':
 	gp.bezier([Point(300, 250), Point(0, 0), Point(465, 111)], 'lut')
 	gp.bezier([Point(100, 250), Point(0, 0), Point(365, 211)], 'casteljau')
 	gp.bezier([Point(520, 180), Point(40, 20), Point(165, 311)], 'direct')
-	gp.bezier([Point(520, 180), Point(40, 20), Point(76, 433), Point(165, 311)], 'approx')
+	gp.bezier([Point(30, 800), Point(400, 0), Point(800, 800), Point(800, 83)], 'approx')
 	gp.pack()
 	tkinter.mainloop()
