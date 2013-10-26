@@ -126,6 +126,6 @@ class Font():
 			g.R('glyphs/%s.svg' % c)
 
 		tkinter.mainloop()
-	
+		
 if __name__ == '__main__':
 	Font().tests()
