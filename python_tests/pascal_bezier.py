@@ -32,11 +32,11 @@ def pascal_row(n):
         # n is even
         result.extend(reversed(result[:-1]))
     else:
-        result.extend(reversed(result)) 
+        result.extend(reversed(result))
     return result
 
 if __name__ == '__main__':
-    im = Image.new('RGBA', (100, 100), (0, 0, 0, 0)) 
+    im = Image.new('RGBA', (1000, 1000), (0, 0, 0, 0))
     draw = ImageDraw.Draw(im)
     ts = [t/100.0 for t in range(101)]
 
