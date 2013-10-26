@@ -44,6 +44,10 @@ class Canvas {
 	private $height;
 	private $bitmap;
 	
+	/* Lookup-tables for Bézier coeffizients */
+	private quad_lut;
+	private cub_lut;
+	
 	public function __construct($width=50, $height=50) {
 		$this->heigt = $height;
 		$this->width = $width;
@@ -93,6 +97,53 @@ class Canvas {
 		}
 	}
 	
+	/* Bézier plotting with look-up tables */
+	
+	private function _gen_quad_LUT() {
+		$t = 0;
+		while ($t < 1) {
+			$t2 = $t*$t;
+			$mt = 1-$t;
+			$mt2 = $mt*$mt;
+			$this->quad_lut[$t] = array($mt2, 2*$mt*$t, $t2);
+			$t += self::STEP;
+		}
+	}
+	
+	private function _gen_cub_LUT() {
+		$t = 0;
+		while ($t < 1) {
+			$t2 = $t*$t;
+			$t3 = $t2 * $t;
+			$mt = 1-$t;
+			$mt2 = $mt * $mt;
+			$mt3 = $mt2 * $mt;
+			$this->cub_lut[$t] = array($mt3, 3*$mt2*$t, 3*$mt*$t2, $t3);
+			$t += self::STEP;
+		}
+	}
+	
+	private function _lut_quad_bez($p1, $p2, $p3) {
+		if (!$this->quad_lut)
+			$this->_gen_quad_LUT();
+			
+		foreach ($this->quad_lut as $c) {
+			$x = intval($p1->x*$c[0] + $p2->x*$c[1] + $p3->x*$c[2]);
+			$y = intval($p1->y*$c[0] + $p2->y*$c[1] + $p3->y*$c[2]);
+			$this->set_pixel($x, $y);
+		}
+	}
+	
+	private function _lut_cub_bez($p1, $p2, $p3, $p4) {
+		if (!$this->cub_lut)
+			$this->_gen_cub_LUT();
+			
+		foreach ($this->cub_lut as $c) {
+			$x = intval($p1->x*$c[0] + $p2->x*$c[1] + $p3->x*$c[2] + $p4->x*$c[3]);
+			$y = intval($p1->y*$c[0] + $p2->y*$c[1] + $p3->y*$c[2] + $p4->y*$c[3]);
+			$this->set_pixel($x, $y);
+		}
+	}
 	
 	public function line($points) {}
 	
@@ -144,11 +195,9 @@ class Glyph extends Canvas {
 	}
 }
 
-
 class G_y extends Glyph {
 	
 }
-
 
 /*
  * The class Captcha represents the Captcha. It is on the top of the abstraction layer of this plugin
@@ -210,6 +259,5 @@ class Captcha {
 	public function reload() {}
 	
 }
-
 
 ?>
