@@ -1,2 +1,3 @@
 # Ignore directory for python bytecode
 __pycache__/
+php_tests/

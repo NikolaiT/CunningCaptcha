@@ -1,7 +1,8 @@
 <?php
 
 /* Tests */
-$c = new Canvas();
+$captcha = new Captcha();
+$captcha->tests();
 
 
 /* 
@@ -39,27 +40,32 @@ class Point {
 class Canvas {
 	
 	const STEP = 0.001;
+	const NUM_SEGMENTS = 15;
 	
 	private $width;
 	private $height;
 	private $bitmap;
 	
 	/* Lookup-tables for Bézier coeffizients */
-	private quad_lut;
-	private cub_lut;
+	private $quad_lut;
+	private $cub_lut;
 	
-	public function __construct($width=50, $height=50) {
-		$this->heigt = $height;
+	public function __construct($width=100, $height=100) {
+		$this->height = $height;
 		$this->width = $width;
 		$this->initbm();
 	}
 	
 	private function initbm() {
-		$this->bitmap = array_fill(0, $this->height, array_fill(0, $this->width, '0 0 0')); /* init the bitmap */
+		$this->bitmap = array_fill(0, $this->height, array_fill(0, $this->width, '255 255 255')); /* init the bitmap */
+	}
+	
+	public function get_bitmap() {
+		return $this->bitmap;
 	}
 	
 	protected function set_pixel($x, $y, $color='0 0 0') {
-		$this->bitmap[$x][$y] = $color;
+		$this->bitmap[$y][$x] = $color;
 	}
 	
 	/* All the different rasterization algorithms. They differ in performance and 
@@ -105,7 +111,7 @@ class Canvas {
 			$t2 = $t*$t;
 			$mt = 1-$t;
 			$mt2 = $mt*$mt;
-			$this->quad_lut[$t] = array($mt2, 2*$mt*$t, $t2);
+			$this->quad_lut[] = array($mt2, 2*$mt*$t, $t2);
 			$t += self::STEP;
 		}
 	}
@@ -118,7 +124,7 @@ class Canvas {
 			$mt = 1-$t;
 			$mt2 = $mt * $mt;
 			$mt3 = $mt2 * $mt;
-			$this->cub_lut[$t] = array($mt3, 3*$mt2*$t, 3*$mt*$t2, $t3);
+			$this->cub_lut[] = array($mt3, 3*$mt2*$t, 3*$mt*$t2, $t3);
 			$t += self::STEP;
 		}
 	}
@@ -145,9 +151,138 @@ class Canvas {
 		}
 	}
 	
-	public function line($points) {}
+	/* The fastest one. Approximates the curve. */
 	
-	public function spline($points) {}
+	private function _approx_quad_bez($p1, $p2, $p3) {
+		$lp = array();
+		$lp[] = $p1;
+		foreach (range(0, self::NUM_SEGMENTS) as $i) {
+			$t = $i / self::NUM_SEGMENTS;
+			$t2 = $t*$t;
+			$mt = 1-$t;
+			$mt2 = $mt*$mt;
+			$x = intval($p1->x*$mt2 + $p2->x*2*$mt*$t + $p3->x*$t2);
+			$y = intval($p1->y*$mt2 + $p2->y*2*$mt*$t + $p3->y*$t2);
+			$lp[] = new Point($x,$y);
+		}	
+		foreach (range(0, count($lp)-2) as $i)
+			$this->line(array($lp[$i], $lp[$i+1]));
+	}
+
+	private function _approx_cub_bez($p1, $p2, $p3, $p4) {
+		$lp = array();
+		$lp[] = $p1;
+		foreach (range(0, self::NUM_SEGMENTS) as $i) {
+			$t = $i / self::NUM_SEGMENTS;
+			$t2 = $t * $t;
+			$t3 = $t2 * $t;
+			$mt = 1-$t;
+			$mt2 = $mt * $mt;
+			$mt3 = $mt2 * $mt;
+			$x = intval($p1->x*$mt3 + 3*$p2->x*$mt2*$t + 3*$p3->x*$mt*$t2 + $p4->x*$t3);
+			$y = intval($p1->y*$mt3 + 3*$p2->y*$mt2*$t + 3*$p3->y*$mt*$t2 + $p4->y*$t3);
+			$lp[] = new Point($x,$y);
+		}
+		foreach (range(0, count($lp)-2) as $i)
+			$this->line(array($lp[$i], $lp[$i+1]));
+	}
+	
+	private function plot_casteljau($points) {
+		foreach ($points as $p) {
+			if (get_class($p) != 'Point')
+				return False;
+		}
+		$t = 0;
+		while ($t <= 1) {
+			$this->_casteljau($points, $t);
+			$t += self::STEP;
+		}
+	}
+	
+	/* Recursive, numerically stable implementation for plotting splines */
+	private function _casteljau($points, $t) {
+		/* Base case */
+		if (count($points) == 1)
+			$this->set_pixel($points[0]->x, $points[0]->y);
+		else {
+			$newpoints = array();
+			foreach (range(0, count($points)-2) as $i) {
+				$x = (1-$t) * $points[$i]->x + $t * $points[$i+1]->x;
+				$y = (1-$t) * $points[$i]->y + $t * $points[$i+1]->y;
+				$newpoints[] = new Point($x, $y);
+			}
+		$this->_casteljau($newpoints, $t);
+		}
+	}
+	
+	public function line($points) {
+		if (count($points) != 2)
+			return False;
+		
+		$x0 = $points[0]->x;
+		$y0 = $points[0]->y;
+		$x1 = $points[1]->x;
+		$y1 = $points[1]->y;
+		
+		$dx = abs($x1-$x0);
+		$dy = -abs($y1-$y0);
+		$sx = $x0<$x1 ? 1 : -1;
+		$sy = $y0<$y1 ? 1 : -1;
+		$err = $dx+$dy;
+		$e2 = 1;
+		while (True) {
+			$this->set_pixel($x0, $y0);
+			if ($x0 == $x1 and $y0 == $y1)
+				break;
+			$e2 = 2*$err;
+			if ($e2 >= $dy) {
+				$err += $dy;
+				$x0 += $sx;
+			}
+			if ($e2 <= $dx) {
+				$err += $dx;
+				$y0 += $sy;
+			}
+		}
+	}
+	
+	public function spline($points, $algo='direct') {
+		foreach ($points as $p) {
+			if (get_class($p) != 'Point')
+				return False;
+		}
+		
+		if (!in_array($algo, array('direct', 'lut', 'approx', 'casteljau')))
+			return False;
+		
+		/* Somehow ugly but what can you do? 
+		 * Send me mail, in case you have a hint: admin [(at)] incolumitas.com
+		 */
+		switch ($algo) {
+			case 'direct':
+				if (count($points) == 3)
+					$this->_direct_quad_bez($points[0], $points[1], $points[2]);
+				if (count($points) == 4)
+					$this->_direct_cub_bez($points[0], $points[1], $points[2], $points[3]);
+				break;
+			case 'lut':
+				if (count($points) == 3)
+					$this->_lut_quad_bez($points[0], $points[1], $points[2]);
+				if (count($points) == 4)
+					$this->_lut_cub_bez($points[0], $points[1], $points[2], $points[3]);
+				break;
+			case 'approx':
+				if (count($points) == 3)
+					$this->_approx_quad_bez($points[0], $points[1], $points[2]);
+				if (count($points) == 4)
+					$this->_approx_cub_bez($points[0], $points[1], $points[2], $points[3]);
+			case 'casteljau':
+				$this->plot_casteljau($points);
+				break;
+			default:
+				break;
+		}
+	}
 }
 
 /*
@@ -214,39 +349,71 @@ class Captcha {
 	private $width;
 	private $height;
 	
-	public function __construct($width=200, $height=80) {
+	public function __construct($width=400, $height=150) {
 		$this->width = $width;
 		$this->height = $height;
 		$this->init_captcha();
 	}
 	
+	public function tests() {
+		/* Tests. */
+		$c = new Canvas();
+		$c->spline(array(new Point(10, 20), new Point(65, 70), new Point(40, 100)), $algo='lut');
+		$c->spline(array(new Point(30, 25), new Point(0,0), new Point(46, 11)), $algo='casteljau');
+		$c->spline(array(new Point(52, 18), new Point(40, 20), new Point(16, 31), new Point(100, 100)), $algo='direct');
+		$c->spline(array(new Point(30, 80), new Point(40, 0), new Point(80, 80), new Point(80, 83)), $algo='approx');
+		$this->copy_glyph(0, 0, $c->get_bitmap());
+		$this->write_image('out', $format='ppm');
+	}
+	
 	private function init_captcha() {
-		$this->bitmap = array_fill(0, $this->height, array_fill(0, $this->width, '0 0 0')); /* init the bitmap */
+		$this->bitmap = array_fill(0, $this->height, array_fill(0, $this->width, '255 255 255')); /* init the bitmap */
+	}
+	
+	/* 
+	 * Copy the glyph data (two dimensional array) with the
+	 * offset given by $dx and $dy into the bitmap of captcha.
+	 * There might be a built-in function for this task such as array_merge()
+	 * or something that is better.
+	 */
+	private function copy_glyph($dy=0, $dx=0, $glyphdata) {
+		$height = count($glyphdata)-1;
+		$width = count($glyphdata[0])-1;
+		/* Check wheter the glyph fits */
+		if ($height+$dy > $this->height || $width+$dx > $this->width)
+			return False;
+		/* If it fits I sits */
+		foreach (range(0, $height) as $i) {
+			foreach (range(0, $width) as $j) {
+				$this->bitmap[$i+$dy][$j+$dx] = $glyphdata[$i][$j];
+			}
+		}
 	}
 	
 	public function write_image($path, $format = 'png') {
 		
-		if (!in_array($format, array('png', 'bbm', 'jpg', 'gif')))
+		if (!in_array($format, array('png', 'ppm', 'jpg', 'gif')))
 			return False;
 		
 		/* Either way we are going to write a file. When we cannot open a file, there
 		 * must be a severe failure and we terminate the script.
 		 */
-		$h = fopen($path.$format, "w") or exit('Error: fopen() failed.');
-	  
+		$h = fopen($path.".".$format, "w") or exit('Error: fopen() failed.');
+
 		switch ($format) {
 			case 'png':
 				break;
 			case 'ppm':
-				fwrite($h, sprintf('P3\n%u %u\n255\n', $this->width, $this->height))
+				/* Writes a colorous ppm image file. It's not compressed */
+				fwrite($h, sprintf("P3\n%u %u\n255\n", $this->width, $this->height))
 															or exit('fwrite() failed.');
 				/* Write all pixels */
-				for ($i = 0; $i < $this->height; $i++) {
-					for ($j = 0; $j < $this->width; $j++) {
-						 fwrite($h, $captcha[$i][$j]."\t");
+				foreach ($this->bitmap as $scanline) {
+					foreach ($scanline as $pixel) {
+						fwrite($h, $pixel."\t");
 					}
 					fwrite($h, "\n");
-				  }
+				}
 				break;
 			default:
 				break;
@@ -257,7 +424,6 @@ class Captcha {
 	}
 	
 	public function reload() {}
-	
 }
 
 ?>
