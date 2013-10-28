@@ -2,8 +2,9 @@
 
 /* 
  * Classes that plot captchas without any dependencies. All pure PHP without using
- * any first, second or third class image processing libraries. 
+ * any first, second or third class image processing libraries.
  * 
+ * @@Version: 0.0
  * @@Author: Nikolai Tschacher
  * @@Date: October 2013
  * @@Contact: incolumitas.com
@@ -18,9 +19,23 @@ function D($a) {
 	print "</pre>";
 }
 
+/* shuffles an array while preserving key=>value pairs. Taken from php.net */
+function shuffle_assoc(&$array) {
+	$keys = array_keys($array);
+	
+	shuffle($keys);
+	
+	foreach ($keys as $key) {
+		$new[$key] = $array[$key];
+	}
+	$array = $new;
+	
+	return true;
+}
+
 /* Tests */
 $captcha = Captcha::get_instance();
-$captcha -> tests();
+$captcha->draw();
 
 
 /* 
@@ -80,7 +95,7 @@ abstract class Canvas {
 	/* All classes that extend Canvas need to draw something */
 	abstract protected function draw();
 	
-	private function initbm() {
+	protected function initbm() {
 		$this->bitmap = array_fill(0, $this->height, array_fill(0, $this->width, '255 255 255')); /* inits the bitmap */
 	}
 	
@@ -97,8 +112,11 @@ abstract class Canvas {
 	 * offset given by $dx and $dy into the bitmap.
 	 * There might be a built-in function for this task such as array_merge()
 	 * or something that is better.
+	 * If $only is specified then only pixels with it's value are copied.
+	 * If $ignorebounds is true, then the function ignores indices that are 
+	 * taller than $this->bitmap (But doesn't set the elements either!)
 	 */
-	protected final function merge($dy=0, $dx=0, $array2d) {
+	protected final function merge($dy=0, $dx=0, $array2d, $only='0 0 0', $ignorebounds=False) {
 		$height = count($array2d)-1;
 		$width = count($array2d[0])-1;
 		/* Check wheter the glyph fits */
@@ -107,7 +125,8 @@ abstract class Canvas {
 		/* If it fits I sits */
 		foreach (range(0, $height) as $i) {
 			foreach (range(0, $width) as $j) {
-				$this->bitmap[$i+$dy][$j+$dx] = $array2d[$i][$j];
+				if ($array2d[$i][$j] === $only)
+					$this->bitmap[$i+$dy][$j+$dx] = $array2d[$i][$j];
 			}
 		}
 	}
@@ -349,18 +368,23 @@ class Glyph extends Canvas {
 	private $character;
 	private $glyphdata;
 	
-	public function __construct($character, $width=60, $height=80) {
+	private $plotted = False;
+	
+	public function __construct($character='', $width=100, $height=80) {
 		parent::__construct($width, $height);
-		$this->get_glyph($character);
+		$this->character = $character;
+		if ($character !== '')
+			$this->load_glyph($character);
 	}
 	
 	/* This function load's the points that constitute the glyph. Maybe it's a design
 	 * error, but a worse alternative would be to make n classes for each character where
 	 * n = len(alphabet). This would imply a lot of redundant code and unflexible handling
 	 */
-	 private function get_glyph($c) {
-		/* That'll be a freaking long switch statement!
-		/* Theres a python function that generates this PHP switch statement,
+	 public function load_glyph($c) {
+		 $this->character = $c;
+		/* 
+		 * Theres a python function that generates this PHP switch statement,
 		 * because the glyphdata may easily change if I redesign the glyph in
 		 * the future.
 		 * It's certainly a bad idea to mix data with code as done here, but in order
@@ -572,14 +596,17 @@ class Glyph extends Canvas {
 				);
 				break;
 			default:
-				break;
+				return False;
 		}
 	}
-	 
+	
+	public function get_glyph() {
+		return $this->character;
+	}
 	 
 	/* 
-	 * Scales the glyphs correctly such that it fits with proportional
-	 * margins on all sides into the glyphs bounding rectangle.
+	 * Scales the glyphs correctly such that it fits with it's
+	 * maximal possible size into the bounding rectangle.
 	 */
 	private function adjust() {
 		if (!$this->glyphdata)
@@ -593,20 +620,28 @@ class Glyph extends Canvas {
 		$dy = $bpoints['max']->y - $bpoints['min']->y;
 		/* And the width */
 		$dx = $bpoints['max']->x - $bpoints['min']->x;
-		//echo "Height of glyph: $dy <br /> Width of glyph: $dx <br />";
 		
 		/* Determine which dimension is critical for resizing. Width or height. Take the smaller. */
 		$f1 = $this->width/$dx; $f2 = $this->height/$dy;
-		/* In case the width and/or length is taller then the default measures we will
-		 * scale the glyph larger. Works the same. 
+		/* In case the width and/or length is taller then the default measures we won't scale
+		 * it with the resulting factor > 1, because the blur() functon might have deliberately
+		 * scaled it.
 		 */
-		$cfactor = $f1 > $f2 ? $f2 : $f1;
+		$cfactor = ($f1 > $f2 ? $f2 : $f1); //$cfactor = $cfactor > 1 ? 1 : $cfactor;
 		$cfactor -= 0.001; /* Guessing some error margin. This is essential */
 		$this->_translate(-$bpoints['min']->x, -$bpoints['min']->y);
 		$this->_scale($cfactor, $cfactor);
 	}
 	
 	public function draw_glyph() {
+		/* Because this class follows the singleton design pattern, it is used to 
+		 * draw several glyphs on its bitmap. But after each plotting we need to erease
+		 * the bitmap before we draw a new glyph.
+		 */
+		 if ($this->plotted)
+			$this->initbm();
+		
+		$this->blur();
 		$this->adjust();
 		
 		foreach ($this->glyphdata as $shapetype => $shapearray) {
@@ -615,6 +650,9 @@ class Glyph extends Canvas {
 					foreach ($this->glyphdata[$shapetype] as $line)
 						$this->line($line);
 					break;
+				case 'quadratic_splines':
+					foreach ($this->glyphdata[$shapetype] as $spline)
+						$this->spline($spline);
 				case 'cubic_splines':
 					foreach ($this->glyphdata[$shapetype] as $spline)
 						$this->spline($spline);
@@ -624,12 +662,23 @@ class Glyph extends Canvas {
 					break;
 			}
 		}
+		$this->plotted = True;
 	}
 	
 	public function draw() { $this->draw_glyph(); }
 	
+	/* Some debugging methods */
 	public function count_glyphdata() {
 		echo "Glyph data count: ".count($this->glyphdata['lines'])." and ".count($this->glyphdata['cubic_splines'])."<br />";
+	}
+	
+	public function p_glyphmeasures() {
+		$bpoints = $this->bounding_points();
+		/* Get the height of our glyph */
+		$dy = $bpoints['max']->y - $bpoints['min']->y;
+		/* And the width */
+		$dx = $bpoints['max']->x - $bpoints['min']->x;
+		echo "Glyph [$this->character]: Height=$dy, Width=$dx <br /><br /><hr>";
 	}
 	
 	/* Gets the bounding rectangle of the glyphdata.
@@ -679,16 +728,23 @@ class Glyph extends Canvas {
 	
 	private function _rotate($a) {}
 	
-	private function _skew($a) {}
+	private function _skew($a) {
+		$code = sprintf('if ($v instanceof Point) { $v->x = intval($v->x+sin(%s)*$v->y);}', $a);
+		$func = create_function('&$v, $k', $code);
+		array_walk_recursive($this->glyphdata, $func);
+	}
 	
-	private function _scale($sx, $sy) {		
+	private function _scale($sx, $sy) {
 		$code = sprintf('if ($v instanceof Point) { $v->x = intval($v->x*%s); $v->y = intval($v->y*%s); }', $sx, $sy);
 		$func = create_function('&$v, $k', $code);
 		array_walk_recursive($this->glyphdata, $func);
-		
 	}
 	
-	private function _shear($a) {}
+	private function _shear($kx, $ky) {
+		$code = sprintf('if ($v instanceof Point) { $v->x = intval($v->x+$v->y*%s); $v->y = intval($v->y+$v->x*%s); }', $ky, $kx);
+		$func = create_function('&$v, $k', $code);
+		array_walk_recursive($this->glyphdata, $func);
+	}
 	
 	private function _translate($dx, $dy) {
 		$code = sprintf('if ($v instanceof Point) { $v->x += %s; $v->y += %s; }', $dx, $dy);
@@ -701,7 +757,14 @@ class Glyph extends Canvas {
 	 * this method essentially determines the strenth of the captcha.
 	 */
 	private function blur() {
+		//$shear = rand(-6, 6)/10;
+		//$this->_shear($shear, $shear);
 		
+		$skew = rand(0, 90);
+		$this->_skew($skew);
+		
+		//$scale = rand(5, 30) / 10;
+		//$this->_scale($scale, $scale);
 	}
 }
 
@@ -722,15 +785,31 @@ class Glyph extends Canvas {
  */
 
 class Captcha extends Canvas {
+	/* The instance of this class */
 	private static $instance;
 	
-	public function __construct($width=400, $height=150) {
+	/* Wheter the user needs to tell the case of each glyph */
+	const CASE_SENSITIVE = False;
+	
+	/* All glyphs */
+	const ALPHABET = 'y, W, G, a, H, i, f, b, n, S, X, k, E, Q';
+	
+	/* A single glyph used as the generic stamp. */
+	private $stamp;
+	
+	/* Length of the captcha */
+	private $clength = 0;
+	
+	public function __construct($clength=7, $height=150) {
 		/* This check needs to be here in order to hold the constructor public (inheritance).
 		 * while keeping Singleton design pattern.
 		 */
 		if(isset(self::$instance))
 			throw new Exception('Only one instance of Captcha allowed!');
-		parent::__construct($width, $height);
+		parent::__construct((new Glyph())->width*$clength + 100, $height);
+		
+		$this->stamp = new Glyph();
+		$this->clength = $clength;
 	}
 	
 	/* 
@@ -749,8 +828,27 @@ class Captcha extends Canvas {
 		return self::$instance;
 	}
 	
-	/* Implement abstract draw() function */
-	public function draw() {}
+	/* 
+	 * Implement abstract draw() function.
+	 * This function merges a random selection of glyphs into the bitmap and
+	 * returns the according string
+     */
+	public function draw() {
+		/* Take n=length random characters from the alphabet */
+		$randalphabet = explode(', ', self::ALPHABET);
+		shuffle($randalphabet);
+		for ($i = 0; $i < $this->clength; $i++) {
+			$randchars[] = $randalphabet[intval(rand(0, count($randalphabet)-1))];
+		}
+		
+		foreach ($randchars as $i => $char) {
+			$this->stamp->load_glyph($char);
+			$this->stamp->draw();
+			$this->merge(rand(0, 50), $i*rand(70, 80), $this->stamp->get_bitmap());
+		}
+		
+		$this->write_image('glyph', $format='ppm');
+	}
 	
 	public function tests() {
 		/* Tests. */
@@ -768,19 +866,19 @@ class Captcha extends Canvas {
 			case 'test-2':
 				$g = new Glyph('W');
 				$g->draw();
-				$this->merge(30, 0, $g->get_bitmap());
+				$this->merge(20, 0, $g->get_bitmap());
 				
 				$gg = new Glyph('H');
 				$gg->draw();
-				$this->merge(30, 100, $gg->get_bitmap());
+				$this->merge(20, 100, $gg->get_bitmap());
 				
 				$ggg = new Glyph('a');
 				$ggg->draw();
-				$this->merge(30, 200, $ggg->get_bitmap());
+				$this->merge(20, 200, $ggg->get_bitmap());
 				
 				$gggg = new Glyph('S');
 				$gggg->draw();
-				$this->merge(30, 300, $gggg->get_bitmap());
+				$this->merge(20, 300, $gggg->get_bitmap());
 				
 				$this->write_image('glyph', $format='ppm');
 				break;
