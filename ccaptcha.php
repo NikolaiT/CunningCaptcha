@@ -2,9 +2,16 @@
 
 error_reporting(E_ALL);
 
+/* Some handy debugging functions. Send me a letter for Christmas! */
+function D($a) {
+	print "<pre>";
+	print_r($a);
+	print "</pre>";
+}
+
 /* Tests */
-$captcha = new Captcha();
-$captcha->tests();
+$captcha = Captcha::get_instance();
+$captcha -> tests();
 
 
 /* 
@@ -36,7 +43,7 @@ class Point {
 /*
  * Describes the class Canvas which implements algorithms to rasterize geometrical primitives such
  * as quadratic and cubic Bézier splines and straight lines. There may be more than one algorithm for each
- * shape.
+ * spline. They differ mostly in performance and smothness of drawing.
  */
  
 class Canvas {
@@ -44,9 +51,12 @@ class Canvas {
 	const STEP = 0.001;
 	const NUM_SEGMENTS = 15;
 	
-	private $width;
-	private $height;
-	private $bitmap;
+	protected $width;
+	protected $height;
+	private $bitmap; /* No class that inherits from the canvas should be able to 
+					  * manipulate the bitmap of the canvas expect through the
+					  * geometrical primitive methods and set_pixel().
+					  */
 	
 	/* Lookup-tables for Bézier coeffizients */
 	private $quad_lut;
@@ -66,7 +76,7 @@ class Canvas {
 		return $this->bitmap;
 	}
 	
-	protected function set_pixel($x, $y, $color='0 0 0') {
+	protected final function set_pixel($x, $y, $color='0 0 0') {
 		$this->bitmap[$y][$x] = $color;
 	}
 	
@@ -298,8 +308,8 @@ class Canvas {
  
 class Glyph extends Canvas {
 	
-	protected $character;
-	protected $glyphdata;
+	private $character;
+	private $glyphdata;
 	
 	public function __construct($character, $width=60, $height=80) {
 		parent::__construct($width, $height);
@@ -311,408 +321,227 @@ class Glyph extends Canvas {
 	 * n = len(alphabet). This would imply a lot of redundant code and unflexible handling
 	 */
 	 private function get_glyph($c) {
-		/* That'll be a freaking long switch statement */
+		/* That'll be a freaking long switch statement!
 		/* Theres a python function that generates this PHP switch statement,
 		 * because the glyphdata may easily change if I redesign the glyph in
 		 * the future.
+		 * It's certainly a bad idea to mix data with code as here, but in order
+		 * to speed things up, this will have to stay in memory ;)
 		 */
 		
 		/* All Glyphs: y, W, G, a, H, i, f, b, n, S, X, k, E, Q */
-		
 		switch ($c) {
 			case 'y':
 				$this->glyphdata = array(
-					'lines' => array(
-						array(new Point(112, 375), new Point(147, 375)),
-						array(new Point(147, 375), new Point(260, 601)),
-						array(new Point(88, 698), new Point(82, 715)),
-						array(new Point(378, 372), new Point(429, 372)),
-						array(new Point(429, 372), new Point(429, 356)),
-						array(new Point(429, 356), new Point(321, 356)),
-						array(new Point(321, 356), new Point(321, 372)),
-						array(new Point(321, 372), new Point(360, 372)),
-						array(new Point(360, 372), new Point(271, 585)),
-						array(new Point(271, 585), new Point(163, 375)),
-						array(new Point(163, 375), new Point(217, 374)),
-						array(new Point(217, 374), new Point(217, 356)),
-						array(new Point(217, 356), new Point(112, 356)),
-						array(new Point(112, 356), new Point(112, 375))
-					),
 					'cubic_splines' => array(
-						array(new Point(260, 601), new Point(260, 601), new Point(230, 670), new Point(204, 695)),
-						array(new Point(204, 695), new Point(191, 706), new Point(175, 717), new Point(158, 719)),
-						array(new Point(158, 719), new Point(135, 722), new Point(88, 698), new Point(88, 698)),
-						array(new Point(82, 715), new Point(82, 715), new Point(131, 737), new Point(155, 735)),
-						array(new Point(155, 735), new Point(175, 733), new Point(194, 721), new Point(210, 708)),
-						array(new Point(210, 708), new Point(240, 681), new Point(257, 642), new Point(277, 606)),
+						array(new Point(260, 601), new Point(260, 601), new Point(230, 670), new Point(204, 695)), array(new Point(204, 695), new Point(191, 706), new Point(175, 717), new Point(158, 719)), array(new Point(158, 719), new Point(135, 722), new Point(88, 698), new Point(88, 698)), array(new Point(82, 715), new Point(82, 715), new Point(131, 737), new Point(155, 735)), 
+						array(new Point(82, 715), new Point(82, 715), new Point(131, 737), new Point(155, 735)), array(new Point(155, 735), new Point(175, 733), new Point(194, 721), new Point(210, 708)), array(new Point(210, 708), new Point(240, 681), new Point(257, 642), new Point(277, 606)), array(new Point(277, 606), new Point(317, 534), new Point(378, 372), new Point(378, 372)),
 						array(new Point(277, 606), new Point(317, 534), new Point(378, 372), new Point(378, 372))
+					),
+					'lines' => array(
+						array(new Point(112, 375), new Point(147, 375)), array(new Point(147, 375), new Point(260, 601)), array(new Point(88, 698), new Point(82, 715)), array(new Point(378, 372), new Point(429, 372)), 
+						array(new Point(378, 372), new Point(429, 372)), array(new Point(429, 372), new Point(429, 356)), array(new Point(429, 356), new Point(321, 356)), array(new Point(321, 356), new Point(321, 372)), 
+						array(new Point(321, 356), new Point(321, 372)), array(new Point(321, 372), new Point(360, 372)), array(new Point(360, 372), new Point(271, 585)), array(new Point(271, 585), new Point(163, 375)), 
+						array(new Point(271, 585), new Point(163, 375)), array(new Point(163, 375), new Point(217, 374)), array(new Point(217, 374), new Point(217, 356)), array(new Point(217, 356), new Point(112, 356)), 
+						array(new Point(217, 356), new Point(112, 356)), array(new Point(112, 356), new Point(112, 375))
 					)
 				);
 				break;
 			case 'W':
 				$this->glyphdata = array(
 					'lines' => array(
-						array(new Point(70, 322), new Point(200, 712)),
-						array(new Point(200, 712), new Point(260, 712)),
-						array(new Point(260, 712), new Point(340, 442)),
-						array(new Point(340, 442), new Point(420, 712)),
-						array(new Point(420, 712), new Point(480, 712)),
-						array(new Point(480, 712), new Point(590, 322)),
-						array(new Point(590, 322), new Point(500, 332)),
-						array(new Point(500, 332), new Point(450, 612)),
-						array(new Point(450, 612), new Point(370, 402)),
-						array(new Point(370, 402), new Point(310, 402)),
-						array(new Point(310, 402), new Point(230, 612)),
-						array(new Point(230, 612), new Point(160, 332)),
+						array(new Point(70, 322), new Point(200, 712)), array(new Point(200, 712), new Point(260, 712)), array(new Point(260, 712), new Point(340, 442)), array(new Point(340, 442), new Point(420, 712)), 
+						array(new Point(340, 442), new Point(420, 712)), array(new Point(420, 712), new Point(480, 712)), array(new Point(480, 712), new Point(590, 322)), array(new Point(590, 322), new Point(500, 332)), 
+						array(new Point(590, 322), new Point(500, 332)), array(new Point(500, 332), new Point(450, 612)), array(new Point(450, 612), new Point(370, 402)), array(new Point(370, 402), new Point(310, 402)), 
+						array(new Point(370, 402), new Point(310, 402)), array(new Point(310, 402), new Point(230, 612)), array(new Point(230, 612), new Point(160, 332)), array(new Point(160, 332), new Point(70, 322)),
 						array(new Point(160, 332), new Point(70, 322))
-					),
-					'cubic_splines' => array(
-						array(new Point(516, 306), new Point(516, 306), new Point(479, 274), new Point(457, 263)),
-						array(new Point(457, 263), new Point(437, 253), new Point(414, 246), new Point(392, 250)),
-						array(new Point(392, 250), new Point(366, 254), new Point(342, 271), new Point(324, 291)),
-						array(new Point(324, 291), new Point(301, 316), new Point(288, 349), new Point(280, 381)),
-						array(new Point(280, 381), new Point(271, 421), new Point(268, 464), new Point(280, 503)),
-						array(new Point(280, 503), new Point(289, 533), new Point(307, 561), new Point(332, 579)),
-						array(new Point(332, 579), new Point(351, 593), new Point(376, 598), new Point(400, 598)),
-						array(new Point(400, 598), new Point(435, 599), new Point(504, 590), new Point(504, 590)),
-						array(new Point(475, 543), new Point(476, 572), new Point(449, 570), new Point(426, 567)),
-						array(new Point(426, 567), new Point(398, 563), new Point(342, 547), new Point(326, 524)),
-						array(new Point(326, 524), new Point(306, 494), new Point(307, 454), new Point(311, 420)),
-						array(new Point(311, 420), new Point(314, 382), new Point(324, 341), new Point(348, 311)),
-						array(new Point(348, 311), new Point(364, 293), new Point(387, 280), new Point(412, 282)),
-						array(new Point(412, 282), new Point(445, 284), new Point(492, 330), new Point(492, 330)),
-						array(new Point(492, 330), new Point(492, 330), new Point(486, 338), new Point(516, 306))
 					)
 				);
 				break;
 			case 'G':
 				$this->glyphdata = array(
-					'lines' => array(
-						array(new Point(504, 590), new Point(506, 448)),
-						array(new Point(506, 448), new Point(386, 446)),
-						array(new Point(386, 446), new Point(384, 477)),
-						array(new Point(384, 477), new Point(475, 477)),
-						array(new Point(475, 477), new Point(475, 543)),
-						array(new Point(516, 306), new Point(516, 306))
+					'cubic_splines' => array(
+						array(new Point(516, 306), new Point(516, 306), new Point(479, 274), new Point(457, 263)), array(new Point(457, 263), new Point(437, 253), new Point(414, 246), new Point(392, 250)), array(new Point(392, 250), new Point(366, 254), new Point(342, 271), new Point(324, 291)), array(new Point(324, 291), new Point(301, 316), new Point(288, 349), new Point(280, 381)), 
+						array(new Point(324, 291), new Point(301, 316), new Point(288, 349), new Point(280, 381)), array(new Point(280, 381), new Point(271, 421), new Point(268, 464), new Point(280, 503)), array(new Point(280, 503), new Point(289, 533), new Point(307, 561), new Point(332, 579)), array(new Point(332, 579), new Point(351, 593), new Point(376, 598), new Point(400, 598)), 
+						array(new Point(332, 579), new Point(351, 593), new Point(376, 598), new Point(400, 598)), array(new Point(400, 598), new Point(435, 599), new Point(504, 590), new Point(504, 590)), array(new Point(475, 543), new Point(476, 572), new Point(449, 570), new Point(426, 567)), array(new Point(426, 567), new Point(398, 563), new Point(342, 547), new Point(326, 524)), 
+						array(new Point(426, 567), new Point(398, 563), new Point(342, 547), new Point(326, 524)), array(new Point(326, 524), new Point(306, 494), new Point(307, 454), new Point(311, 420)), array(new Point(311, 420), new Point(314, 382), new Point(324, 341), new Point(348, 311)), array(new Point(348, 311), new Point(364, 293), new Point(387, 280), new Point(412, 282)), 
+						array(new Point(348, 311), new Point(364, 293), new Point(387, 280), new Point(412, 282)), array(new Point(412, 282), new Point(445, 284), new Point(492, 330), new Point(492, 330)), array(new Point(492, 330), new Point(492, 330), new Point(486, 338), new Point(516, 306))
 					),
-					'cubic_splines' => array()
+					'lines' => array(
+						array(new Point(504, 590), new Point(506, 448)), array(new Point(506, 448), new Point(386, 446)), array(new Point(386, 446), new Point(384, 477)), array(new Point(384, 477), new Point(475, 477)), 
+						array(new Point(384, 477), new Point(475, 477)), array(new Point(475, 477), new Point(475, 543)), array(new Point(516, 306), new Point(516, 306))
+					)
 				);
 				break;
 			case 'a':
 				$this->glyphdata = array(
-					'lines' => array(
-						array(new Point(401, 530), new Point(455, 91)),
-						array(new Point(315, 20), new Point(315, 20)),
-						array(new Point(372, 303), new Point(372, 303))
-					),
 					'cubic_splines' => array(
-						array(new Point(315, 20), new Point(283, 20), new Point(253, 29), new Point(227, 47)),
-						array(new Point(227, 47), new Point(191, 73), new Point(180, 182), new Point(180, 182)),
-						array(new Point(180, 182), new Point(193, 197), new Point(215, 232), new Point(215, 232)),
-						array(new Point(215, 232), new Point(215, 232), new Point(224, 119), new Point(249, 92)),
-						array(new Point(249, 92), new Point(281, 51), new Point(327, 46), new Point(382, 94)),
-						array(new Point(382, 94), new Point(420, 150), new Point(397, 205), new Point(365, 248)),
-						array(new Point(365, 248), new Point(329, 297), new Point(271, 294), new Point(225, 307)),
-						array(new Point(225, 307), new Point(129, 346), new Point(120, 464), new Point(143, 541)),
-						array(new Point(143, 541), new Point(152, 582), new Point(173, 610), new Point(210, 621)),
-						array(new Point(210, 621), new Point(270, 638), new Point(313, 621), new Point(345, 583)),
-						array(new Point(345, 583), new Point(351, 610), new Point(352, 640), new Point(378, 646)),
-						array(new Point(378, 646), new Point(418, 654), new Point(471, 648), new Point(432, 609)),
-						array(new Point(432, 609), new Point(393, 571), new Point(403, 555), new Point(401, 530)),
-						array(new Point(455, 91), new Point(459, 63), new Point(411, 37), new Point(360, 25)),
-						array(new Point(360, 25), new Point(344, 21), new Point(329, 20), new Point(315, 20)),
-						array(new Point(372, 303), new Point(390, 387), new Point(371, 555), new Point(272, 591)),
-						array(new Point(272, 591), new Point(174, 628), new Point(155, 454), new Point(192, 404)),
-						array(new Point(192, 404), new Point(244, 333), new Point(298, 299), new Point(372, 303))
+						array(new Point(315, 20), new Point(283, 20), new Point(253, 29), new Point(227, 47)), array(new Point(227, 47), new Point(191, 73), new Point(180, 182), new Point(180, 182)), array(new Point(180, 182), new Point(193, 197), new Point(215, 232), new Point(215, 232)), array(new Point(215, 232), new Point(215, 232), new Point(224, 119), new Point(249, 92)), 
+						array(new Point(215, 232), new Point(215, 232), new Point(224, 119), new Point(249, 92)), array(new Point(249, 92), new Point(281, 51), new Point(327, 46), new Point(382, 94)), array(new Point(382, 94), new Point(420, 150), new Point(397, 205), new Point(365, 248)), array(new Point(365, 248), new Point(329, 297), new Point(271, 294), new Point(225, 307)), 
+						array(new Point(365, 248), new Point(329, 297), new Point(271, 294), new Point(225, 307)), array(new Point(225, 307), new Point(129, 346), new Point(120, 464), new Point(143, 541)), array(new Point(143, 541), new Point(152, 582), new Point(173, 610), new Point(210, 621)), array(new Point(210, 621), new Point(270, 638), new Point(313, 621), new Point(345, 583)), 
+						array(new Point(210, 621), new Point(270, 638), new Point(313, 621), new Point(345, 583)), array(new Point(345, 583), new Point(351, 610), new Point(352, 640), new Point(378, 646)), array(new Point(378, 646), new Point(418, 654), new Point(471, 648), new Point(432, 609)), array(new Point(432, 609), new Point(393, 571), new Point(403, 555), new Point(401, 530)), 
+						array(new Point(432, 609), new Point(393, 571), new Point(403, 555), new Point(401, 530)), array(new Point(455, 91), new Point(459, 63), new Point(411, 37), new Point(360, 25)), array(new Point(360, 25), new Point(344, 21), new Point(329, 20), new Point(315, 20)), array(new Point(372, 303), new Point(390, 387), new Point(371, 555), new Point(272, 591)), 
+						array(new Point(372, 303), new Point(390, 387), new Point(371, 555), new Point(272, 591)), array(new Point(272, 591), new Point(174, 628), new Point(155, 454), new Point(192, 404)), array(new Point(192, 404), new Point(244, 333), new Point(298, 299), new Point(372, 303))
+					),
+					'lines' => array(
+						array(new Point(401, 530), new Point(455, 91)), array(new Point(315, 20), new Point(315, 20)), array(new Point(372, 303), new Point(372, 303))
 					)
 				);
 				break;
 			case 'H':
 				$this->glyphdata = array(
 					'lines' => array(
-						array(new Point(115, 172), new Point(115, 207)),
-						array(new Point(115, 207), new Point(170, 207)),
-						array(new Point(170, 207), new Point(170, 692)),
-						array(new Point(170, 692), new Point(115, 692)),
-						array(new Point(115, 692), new Point(115, 722)),
-						array(new Point(115, 722), new Point(265, 722)),
-						array(new Point(265, 722), new Point(265, 692)),
-						array(new Point(265, 692), new Point(210, 692)),
-						array(new Point(210, 692), new Point(210, 442)),
-						array(new Point(210, 442), new Point(440, 442)),
-						array(new Point(440, 442), new Point(440, 692)),
-						array(new Point(440, 692), new Point(380, 692)),
-						array(new Point(380, 692), new Point(380, 722)),
-						array(new Point(380, 722), new Point(535, 722)),
-						array(new Point(535, 722), new Point(535, 692)),
-						array(new Point(535, 692), new Point(485, 692)),
-						array(new Point(485, 692), new Point(485, 207)),
-						array(new Point(485, 207), new Point(535, 207)),
-						array(new Point(535, 207), new Point(535, 172)),
-						array(new Point(535, 172), new Point(380, 172)),
-						array(new Point(380, 172), new Point(380, 207)),
-						array(new Point(380, 207), new Point(440, 207)),
-						array(new Point(440, 207), new Point(440, 402)),
-						array(new Point(440, 402), new Point(210, 402)),
-						array(new Point(210, 402), new Point(210, 207)),
-						array(new Point(210, 207), new Point(265, 207)),
-						array(new Point(265, 207), new Point(265, 172)),
+						array(new Point(115, 172), new Point(115, 207)), array(new Point(115, 207), new Point(170, 207)), array(new Point(170, 207), new Point(170, 692)), array(new Point(170, 692), new Point(115, 692)), 
+						array(new Point(170, 692), new Point(115, 692)), array(new Point(115, 692), new Point(115, 722)), array(new Point(115, 722), new Point(265, 722)), array(new Point(265, 722), new Point(265, 692)), 
+						array(new Point(265, 722), new Point(265, 692)), array(new Point(265, 692), new Point(210, 692)), array(new Point(210, 692), new Point(210, 442)), array(new Point(210, 442), new Point(440, 442)), 
+						array(new Point(210, 442), new Point(440, 442)), array(new Point(440, 442), new Point(440, 692)), array(new Point(440, 692), new Point(380, 692)), array(new Point(380, 692), new Point(380, 722)), 
+						array(new Point(380, 692), new Point(380, 722)), array(new Point(380, 722), new Point(535, 722)), array(new Point(535, 722), new Point(535, 692)), array(new Point(535, 692), new Point(485, 692)), 
+						array(new Point(535, 692), new Point(485, 692)), array(new Point(485, 692), new Point(485, 207)), array(new Point(485, 207), new Point(535, 207)), array(new Point(535, 207), new Point(535, 172)), 
+						array(new Point(535, 207), new Point(535, 172)), array(new Point(535, 172), new Point(380, 172)), array(new Point(380, 172), new Point(380, 207)), array(new Point(380, 207), new Point(440, 207)), 
+						array(new Point(380, 207), new Point(440, 207)), array(new Point(440, 207), new Point(440, 402)), array(new Point(440, 402), new Point(210, 402)), array(new Point(210, 402), new Point(210, 207)), 
+						array(new Point(210, 402), new Point(210, 207)), array(new Point(210, 207), new Point(265, 207)), array(new Point(265, 207), new Point(265, 172)), array(new Point(265, 172), new Point(115, 172)),
 						array(new Point(265, 172), new Point(115, 172))
-					),
-					'cubic_splines' => array()
+					)
 				);
 				break;
 			case 'i':
 				$this->glyphdata = array(
-					'lines' => array(
-						array(new Point(300, 379), new Point(300, 852)),
-						array(new Point(300, 852), new Point(373, 852)),
-						array(new Point(373, 852), new Point(373, 379)),
-						array(new Point(373, 379), new Point(300, 379)),
-						array(new Point(344, 166), new Point(344, 166))
-					),
 					'cubic_splines' => array(
-						array(new Point(344, 166), new Point(325, 165), new Point(305, 179), new Point(294, 194)),
-						array(new Point(294, 194), new Point(283, 210), new Point(277, 232), new Point(284, 250)),
-						array(new Point(284, 250), new Point(291, 272), new Point(314, 293), new Point(337, 295)),
-						array(new Point(337, 295), new Point(356, 296), new Point(376, 282), new Point(386, 265)),
-						array(new Point(386, 265), new Point(397, 247), new Point(399, 221), new Point(390, 202)),
-						array(new Point(390, 202), new Point(382, 184), new Point(363, 168), new Point(344, 166))
+						array(new Point(344, 166), new Point(325, 165), new Point(305, 179), new Point(294, 194)), array(new Point(294, 194), new Point(283, 210), new Point(277, 232), new Point(284, 250)), array(new Point(284, 250), new Point(291, 272), new Point(314, 293), new Point(337, 295)), array(new Point(337, 295), new Point(356, 296), new Point(376, 282), new Point(386, 265)), 
+						array(new Point(337, 295), new Point(356, 296), new Point(376, 282), new Point(386, 265)), array(new Point(386, 265), new Point(397, 247), new Point(399, 221), new Point(390, 202)), array(new Point(390, 202), new Point(382, 184), new Point(363, 168), new Point(344, 166))
+					),
+					'lines' => array(
+						array(new Point(300, 379), new Point(300, 852)), array(new Point(300, 852), new Point(373, 852)), array(new Point(373, 852), new Point(373, 379)), array(new Point(373, 379), new Point(300, 379)), 
+						array(new Point(373, 379), new Point(300, 379)), array(new Point(344, 166), new Point(344, 166))
 					)
 				);
 				break;
 			case 'f':
 				$this->glyphdata = array(
-					'lines' => array(
-						array(new Point(450, 182), new Point(450, 132)),
-						array(new Point(270, 302), new Point(210, 302)),
-						array(new Point(210, 302), new Point(210, 332)),
-						array(new Point(210, 332), new Point(270, 332)),
-						array(new Point(270, 332), new Point(270, 702)),
-						array(new Point(270, 702), new Point(210, 702)),
-						array(new Point(210, 702), new Point(210, 732)),
-						array(new Point(210, 732), new Point(340, 732)),
-						array(new Point(340, 732), new Point(360, 702)),
-						array(new Point(360, 702), new Point(300, 702)),
-						array(new Point(300, 702), new Point(300, 332)),
-						array(new Point(300, 332), new Point(360, 332)),
-						array(new Point(360, 332), new Point(360, 302)),
-						array(new Point(360, 302), new Point(300, 302)),
-						array(new Point(450, 182), new Point(450, 182))
-					),
 					'cubic_splines' => array(
-						array(new Point(450, 132), new Point(450, 132), new Point(377, 132), new Point(348, 143)),
-						array(new Point(348, 143), new Point(316, 156), new Point(294, 180), new Point(280, 212)),
-						array(new Point(280, 212), new Point(267, 240), new Point(270, 302), new Point(270, 302)),
-						array(new Point(300, 302), new Point(300, 302), new Point(297, 248), new Point(307, 223)),
-						array(new Point(307, 223), new Point(316, 200), new Point(356, 180), new Point(380, 172)),
-						array(new Point(380, 172), new Point(407, 163), new Point(450, 182), new Point(450, 182))
+						array(new Point(450, 132), new Point(450, 132), new Point(377, 132), new Point(348, 143)), array(new Point(348, 143), new Point(316, 156), new Point(294, 180), new Point(280, 212)), array(new Point(280, 212), new Point(267, 240), new Point(270, 302), new Point(270, 302)), array(new Point(300, 302), new Point(300, 302), new Point(297, 248), new Point(307, 223)), 
+						array(new Point(300, 302), new Point(300, 302), new Point(297, 248), new Point(307, 223)), array(new Point(307, 223), new Point(316, 200), new Point(356, 180), new Point(380, 172)), array(new Point(380, 172), new Point(407, 163), new Point(450, 182), new Point(450, 182))
+					),
+					'lines' => array(
+						array(new Point(450, 182), new Point(450, 132)), array(new Point(270, 302), new Point(210, 302)), array(new Point(210, 302), new Point(210, 332)), array(new Point(210, 332), new Point(270, 332)), 
+						array(new Point(210, 332), new Point(270, 332)), array(new Point(270, 332), new Point(270, 702)), array(new Point(270, 702), new Point(210, 702)), array(new Point(210, 702), new Point(210, 732)), 
+						array(new Point(210, 702), new Point(210, 732)), array(new Point(210, 732), new Point(340, 732)), array(new Point(340, 732), new Point(360, 702)), array(new Point(360, 702), new Point(300, 702)), 
+						array(new Point(360, 702), new Point(300, 702)), array(new Point(300, 702), new Point(300, 332)), array(new Point(300, 332), new Point(360, 332)), array(new Point(360, 332), new Point(360, 302)), 
+						array(new Point(360, 332), new Point(360, 302)), array(new Point(360, 302), new Point(300, 302)), array(new Point(450, 182), new Point(450, 182))
 					)
 				);
 				break;
 			case 'b':
 				$this->glyphdata = array(
-					'lines' => array(
-						array(new Point(234, 570), new Point(279, 279)),
-						array(new Point(279, 279), new Point(237, 275)),
-						array(new Point(263, 580), new Point(263, 580))
-					),
 					'cubic_splines' => array(
-						array(new Point(237, 275), new Point(233, 288), new Point(232, 295), new Point(231, 301)),
-						array(new Point(231, 301), new Point(194, 577), new Point(199, 713), new Point(199, 713)),
-						array(new Point(199, 713), new Point(199, 713), new Point(336, 729), new Point(382, 689)),
-						array(new Point(382, 689), new Point(416, 660), new Point(431, 604), new Point(418, 562)),
-						array(new Point(418, 562), new Point(407, 529), new Point(371, 496), new Point(335, 495)),
-						array(new Point(335, 495), new Point(293, 495), new Point(234, 570), new Point(234, 570)),
-						array(new Point(263, 580), new Point(263, 580), new Point(212, 648), new Point(232, 673)),
-						array(new Point(232, 673), new Point(258, 706), new Point(325, 691), new Point(355, 663)),
-						array(new Point(355, 663), new Point(380, 641), new Point(383, 596), new Point(372, 564)),
-						array(new Point(372, 564), new Point(366, 547), new Point(350, 528), new Point(332, 528)),
-						array(new Point(332, 528), new Point(303, 526), new Point(263, 580), new Point(263, 580))
+						array(new Point(237, 275), new Point(233, 288), new Point(232, 295), new Point(231, 301)), array(new Point(231, 301), new Point(194, 577), new Point(199, 713), new Point(199, 713)), array(new Point(199, 713), new Point(199, 713), new Point(336, 729), new Point(382, 689)), array(new Point(382, 689), new Point(416, 660), new Point(431, 604), new Point(418, 562)), 
+						array(new Point(382, 689), new Point(416, 660), new Point(431, 604), new Point(418, 562)), array(new Point(418, 562), new Point(407, 529), new Point(371, 496), new Point(335, 495)), array(new Point(335, 495), new Point(293, 495), new Point(234, 570), new Point(234, 570)), array(new Point(263, 580), new Point(263, 580), new Point(212, 648), new Point(232, 673)), 
+						array(new Point(263, 580), new Point(263, 580), new Point(212, 648), new Point(232, 673)), array(new Point(232, 673), new Point(258, 706), new Point(325, 691), new Point(355, 663)), array(new Point(355, 663), new Point(380, 641), new Point(383, 596), new Point(372, 564)), array(new Point(372, 564), new Point(366, 547), new Point(350, 528), new Point(332, 528)), 
+						array(new Point(372, 564), new Point(366, 547), new Point(350, 528), new Point(332, 528)), array(new Point(332, 528), new Point(303, 526), new Point(263, 580), new Point(263, 580))
+					),
+					'lines' => array(
+						array(new Point(234, 570), new Point(279, 279)), array(new Point(279, 279), new Point(237, 275)), array(new Point(263, 580), new Point(263, 580))
 					)
 				);
 				break;
 			case 'n':
 				$this->glyphdata = array(
-					'lines' => array(
-						array(new Point(170, 332), new Point(170, 362)),
-						array(new Point(170, 362), new Point(220, 362)),
-						array(new Point(220, 362), new Point(220, 682)),
-						array(new Point(220, 682), new Point(170, 682)),
-						array(new Point(170, 682), new Point(140, 712)),
-						array(new Point(140, 712), new Point(300, 712)),
-						array(new Point(300, 712), new Point(300, 682)),
-						array(new Point(300, 682), new Point(250, 682)),
-						array(new Point(250, 682), new Point(251, 382)),
-						array(new Point(480, 442), new Point(480, 682)),
-						array(new Point(480, 682), new Point(430, 682)),
-						array(new Point(430, 682), new Point(430, 712)),
-						array(new Point(430, 712), new Point(560, 712)),
-						array(new Point(560, 712), new Point(510, 682)),
-						array(new Point(510, 682), new Point(510, 442)),
-						array(new Point(250, 352), new Point(250, 332)),
-						array(new Point(250, 332), new Point(170, 332))
-					),
 					'cubic_splines' => array(
-						array(new Point(251, 382), new Point(251, 382), new Point(286, 370), new Point(346, 371)),
-						array(new Point(346, 371), new Point(407, 373), new Point(427, 385), new Point(444, 399)),
-						array(new Point(444, 399), new Point(458, 411), new Point(480, 442), new Point(480, 442)),
-						array(new Point(510, 442), new Point(510, 442), new Point(501, 403), new Point(480, 382)),
-						array(new Point(480, 382), new Point(450, 352), new Point(428, 347), new Point(360, 342)),
-						array(new Point(360, 342), new Point(291, 337), new Point(250, 352), new Point(250, 352))
+						array(new Point(251, 382), new Point(251, 382), new Point(286, 370), new Point(346, 371)), array(new Point(346, 371), new Point(407, 373), new Point(427, 385), new Point(444, 399)), array(new Point(444, 399), new Point(458, 411), new Point(480, 442), new Point(480, 442)), array(new Point(510, 442), new Point(510, 442), new Point(501, 403), new Point(480, 382)), 
+						array(new Point(510, 442), new Point(510, 442), new Point(501, 403), new Point(480, 382)), array(new Point(480, 382), new Point(450, 352), new Point(428, 347), new Point(360, 342)), array(new Point(360, 342), new Point(291, 337), new Point(250, 352), new Point(250, 352))
+					),
+					'lines' => array(
+						array(new Point(170, 332), new Point(170, 362)), array(new Point(170, 362), new Point(220, 362)), array(new Point(220, 362), new Point(220, 682)), array(new Point(220, 682), new Point(170, 682)), 
+						array(new Point(220, 682), new Point(170, 682)), array(new Point(170, 682), new Point(140, 712)), array(new Point(140, 712), new Point(300, 712)), array(new Point(300, 712), new Point(300, 682)), 
+						array(new Point(300, 712), new Point(300, 682)), array(new Point(300, 682), new Point(250, 682)), array(new Point(250, 682), new Point(251, 382)), array(new Point(480, 442), new Point(480, 682)), 
+						array(new Point(480, 442), new Point(480, 682)), array(new Point(480, 682), new Point(430, 682)), array(new Point(430, 682), new Point(430, 712)), array(new Point(430, 712), new Point(560, 712)), 
+						array(new Point(430, 712), new Point(560, 712)), array(new Point(560, 712), new Point(510, 682)), array(new Point(510, 682), new Point(510, 442)), array(new Point(250, 352), new Point(250, 332)), 
+						array(new Point(250, 352), new Point(250, 332)), array(new Point(250, 332), new Point(170, 332))
 					)
 				);
 				break;
 			case 'S':
 				$this->glyphdata = array(
-					'lines' => array(
-						array(new Point(531, 248), new Point(530, 182)),
-						array(new Point(185, 761), new Point(187, 829)),
-						array(new Point(471, 504), new Point(471, 504))
-					),
 					'cubic_splines' => array(
-						array(new Point(471, 504), new Point(434, 427), new Point(325, 402), new Point(283, 327)),
-						array(new Point(283, 327), new Point(272, 306), new Point(262, 279), new Point(269, 256)),
-						array(new Point(269, 256), new Point(276, 234), new Point(300, 220), new Point(319, 209)),
-						array(new Point(319, 209), new Point(341, 196), new Point(366, 188), new Point(391, 186)),
-						array(new Point(391, 186), new Point(428, 182), new Point(472, 180), new Point(503, 201)),
-						array(new Point(503, 201), new Point(519, 211), new Point(532, 266), new Point(531, 248)),
-						array(new Point(530, 182), new Point(529, 159), new Point(538, 154), new Point(477, 153)),
-						array(new Point(477, 153), new Point(477, 153), new Point(345, 138), new Point(272, 196)),
-						array(new Point(272, 196), new Point(200, 254), new Point(211, 307), new Point(223, 334)),
-						array(new Point(223, 334), new Point(258, 415), new Point(367, 442), new Point(417, 515)),
-						array(new Point(417, 515), new Point(432, 538), new Point(440, 565), new Point(446, 592)),
-						array(new Point(446, 592), new Point(454, 631), new Point(456, 671), new Point(451, 710)),
-						array(new Point(451, 710), new Point(445, 747), new Point(449, 778), new Point(412, 817)),
-						array(new Point(412, 817), new Point(366, 865), new Point(268, 869), new Point(212, 833)),
-						array(new Point(212, 833), new Point(190, 819), new Point(184, 742), new Point(185, 761)),
-						array(new Point(187, 829), new Point(190, 883), new Point(251, 880), new Point(278, 880)),
-						array(new Point(278, 880), new Point(308, 879), new Point(337, 879), new Point(366, 879)),
-						array(new Point(366, 879), new Point(419, 878), new Point(471, 802), new Point(491, 743)),
+						array(new Point(471, 504), new Point(434, 427), new Point(325, 402), new Point(283, 327)), array(new Point(283, 327), new Point(272, 306), new Point(262, 279), new Point(269, 256)), array(new Point(269, 256), new Point(276, 234), new Point(300, 220), new Point(319, 209)), array(new Point(319, 209), new Point(341, 196), new Point(366, 188), new Point(391, 186)), 
+						array(new Point(319, 209), new Point(341, 196), new Point(366, 188), new Point(391, 186)), array(new Point(391, 186), new Point(428, 182), new Point(472, 180), new Point(503, 201)), array(new Point(503, 201), new Point(519, 211), new Point(532, 266), new Point(531, 248)), array(new Point(530, 182), new Point(529, 159), new Point(538, 154), new Point(477, 153)), 
+						array(new Point(530, 182), new Point(529, 159), new Point(538, 154), new Point(477, 153)), array(new Point(477, 153), new Point(477, 153), new Point(345, 138), new Point(272, 196)), array(new Point(272, 196), new Point(200, 254), new Point(211, 307), new Point(223, 334)), array(new Point(223, 334), new Point(258, 415), new Point(367, 442), new Point(417, 515)), 
+						array(new Point(223, 334), new Point(258, 415), new Point(367, 442), new Point(417, 515)), array(new Point(417, 515), new Point(432, 538), new Point(440, 565), new Point(446, 592)), array(new Point(446, 592), new Point(454, 631), new Point(456, 671), new Point(451, 710)), array(new Point(451, 710), new Point(445, 747), new Point(449, 778), new Point(412, 817)), 
+						array(new Point(451, 710), new Point(445, 747), new Point(449, 778), new Point(412, 817)), array(new Point(412, 817), new Point(366, 865), new Point(268, 869), new Point(212, 833)), array(new Point(212, 833), new Point(190, 819), new Point(184, 742), new Point(185, 761)), array(new Point(187, 829), new Point(190, 883), new Point(251, 880), new Point(278, 880)), 
+						array(new Point(187, 829), new Point(190, 883), new Point(251, 880), new Point(278, 880)), array(new Point(278, 880), new Point(308, 879), new Point(337, 879), new Point(366, 879)), array(new Point(366, 879), new Point(419, 878), new Point(471, 802), new Point(491, 743)), array(new Point(491, 743), new Point(517, 668), new Point(506, 576), new Point(471, 504)),
 						array(new Point(491, 743), new Point(517, 668), new Point(506, 576), new Point(471, 504))
+					),
+					'lines' => array(
+						array(new Point(531, 248), new Point(530, 182)), array(new Point(185, 761), new Point(187, 829)), array(new Point(471, 504), new Point(471, 504))
 					)
 				);
 				break;
 			case 'X':
 				$this->glyphdata = array(
 					'lines' => array(
-						array(new Point(200, 322), new Point(320, 522)),
-						array(new Point(320, 522), new Point(190, 712)),
-						array(new Point(190, 712), new Point(230, 712)),
-						array(new Point(230, 712), new Point(340, 542)),
-						array(new Point(340, 542), new Point(450, 722)),
-						array(new Point(450, 722), new Point(490, 722)),
-						array(new Point(490, 722), new Point(360, 512)),
-						array(new Point(360, 512), new Point(486, 322)),
-						array(new Point(486, 322), new Point(450, 322)),
-						array(new Point(450, 322), new Point(340, 492)),
-						array(new Point(340, 492), new Point(240, 322)),
-						array(new Point(240, 322), new Point(200, 322))
-					),
-					'cubic_splines' => array()
+						array(new Point(200, 322), new Point(320, 522)), array(new Point(320, 522), new Point(190, 712)), array(new Point(190, 712), new Point(230, 712)), array(new Point(230, 712), new Point(340, 542)), 
+						array(new Point(230, 712), new Point(340, 542)), array(new Point(340, 542), new Point(450, 722)), array(new Point(450, 722), new Point(490, 722)), array(new Point(490, 722), new Point(360, 512)), 
+						array(new Point(490, 722), new Point(360, 512)), array(new Point(360, 512), new Point(486, 322)), array(new Point(486, 322), new Point(450, 322)), array(new Point(450, 322), new Point(340, 492)), 
+						array(new Point(450, 322), new Point(340, 492)), array(new Point(340, 492), new Point(240, 322)), array(new Point(240, 322), new Point(200, 322))
+					)
 				);
 				break;
 			case 'k':
 				$this->glyphdata = array(
-					'lines' => array(
-						array(new Point(141, 160), new Point(162, 166)),
-						array(new Point(162, 166), new Point(163, 618)),
-						array(new Point(163, 618), new Point(215, 605)),
-						array(new Point(215, 605), new Point(221, 574)),
-						array(new Point(221, 574), new Point(187, 590)),
-						array(new Point(187, 590), new Point(193, 477)),
-						array(new Point(193, 477), new Point(317, 455)),
-						array(new Point(317, 455), new Point(317, 502)),
-						array(new Point(317, 502), new Point(350, 545)),
-						array(new Point(350, 545), new Point(414, 621)),
-						array(new Point(414, 621), new Point(448, 594)),
-						array(new Point(448, 594), new Point(463, 532)),
-						array(new Point(188, 340), new Point(186, 148)),
-						array(new Point(186, 148), new Point(142, 143)),
-						array(new Point(142, 143), new Point(141, 160)),
-						array(new Point(201, 377), new Point(200, 453)),
-						array(new Point(200, 453), new Point(307, 435)),
-						array(new Point(335, 301), new Point(335, 301))
-					),
 					'cubic_splines' => array(
-						array(new Point(463, 532), new Point(463, 532), new Point(440, 584), new Point(421, 587)),
-						array(new Point(421, 587), new Point(399, 591), new Point(390, 553), new Point(376, 536)),
-						array(new Point(376, 536), new Point(363, 520), new Point(339, 492), new Point(343, 473)),
-						array(new Point(343, 473), new Point(349, 435), new Point(387, 447), new Point(398, 410)),
-						array(new Point(398, 410), new Point(409, 378), new Point(431, 328), new Point(412, 300)),
-						array(new Point(412, 300), new Point(400, 280), new Point(400, 277), new Point(377, 278)),
-						array(new Point(377, 278), new Point(320, 281), new Point(188, 340), new Point(188, 340)),
-						array(new Point(335, 301), new Point(284, 311), new Point(202, 331), new Point(201, 377)),
-						array(new Point(307, 435), new Point(341, 429), new Point(372, 401), new Point(387, 370)),
-						array(new Point(387, 370), new Point(397, 352), new Point(404, 323), new Point(390, 307)),
-						array(new Point(390, 307), new Point(378, 293), new Point(353, 297), new Point(335, 301))
+						array(new Point(463, 532), new Point(463, 532), new Point(440, 584), new Point(421, 587)), array(new Point(421, 587), new Point(399, 591), new Point(390, 553), new Point(376, 536)), array(new Point(376, 536), new Point(363, 520), new Point(339, 492), new Point(343, 473)), array(new Point(343, 473), new Point(349, 435), new Point(387, 447), new Point(398, 410)), 
+						array(new Point(343, 473), new Point(349, 435), new Point(387, 447), new Point(398, 410)), array(new Point(398, 410), new Point(409, 378), new Point(431, 328), new Point(412, 300)), array(new Point(412, 300), new Point(400, 280), new Point(400, 277), new Point(377, 278)), array(new Point(377, 278), new Point(320, 281), new Point(188, 340), new Point(188, 340)), 
+						array(new Point(377, 278), new Point(320, 281), new Point(188, 340), new Point(188, 340)), array(new Point(335, 301), new Point(284, 311), new Point(202, 331), new Point(201, 377)), array(new Point(307, 435), new Point(341, 429), new Point(372, 401), new Point(387, 370)), array(new Point(387, 370), new Point(397, 352), new Point(404, 323), new Point(390, 307)), 
+						array(new Point(387, 370), new Point(397, 352), new Point(404, 323), new Point(390, 307)), array(new Point(390, 307), new Point(378, 293), new Point(353, 297), new Point(335, 301))
+					),
+					'lines' => array(
+						array(new Point(141, 160), new Point(162, 166)), array(new Point(162, 166), new Point(163, 618)), array(new Point(163, 618), new Point(215, 605)), array(new Point(215, 605), new Point(221, 574)), 
+						array(new Point(215, 605), new Point(221, 574)), array(new Point(221, 574), new Point(187, 590)), array(new Point(187, 590), new Point(193, 477)), array(new Point(193, 477), new Point(317, 455)), 
+						array(new Point(193, 477), new Point(317, 455)), array(new Point(317, 455), new Point(317, 502)), array(new Point(317, 502), new Point(350, 545)), array(new Point(350, 545), new Point(414, 621)), 
+						array(new Point(350, 545), new Point(414, 621)), array(new Point(414, 621), new Point(448, 594)), array(new Point(448, 594), new Point(463, 532)), array(new Point(188, 340), new Point(186, 148)), 
+						array(new Point(188, 340), new Point(186, 148)), array(new Point(186, 148), new Point(142, 143)), array(new Point(142, 143), new Point(141, 160)), array(new Point(201, 377), new Point(200, 453)), 
+						array(new Point(201, 377), new Point(200, 453)), array(new Point(200, 453), new Point(307, 435)), array(new Point(335, 301), new Point(335, 301))
 					)
 				);
 				break;
 			case 'E':
 				$this->glyphdata = array(
 					'lines' => array(
-						array(new Point(150, 202), new Point(150, 252)),
-						array(new Point(150, 252), new Point(200, 252)),
-						array(new Point(200, 252), new Point(200, 832)),
-						array(new Point(200, 832), new Point(150, 832)),
-						array(new Point(150, 832), new Point(150, 882)),
-						array(new Point(150, 882), new Point(520, 882)),
-						array(new Point(520, 882), new Point(520, 752)),
-						array(new Point(520, 752), new Point(470, 752)),
-						array(new Point(470, 752), new Point(470, 832)),
-						array(new Point(470, 832), new Point(250, 832)),
-						array(new Point(250, 832), new Point(250, 562)),
-						array(new Point(250, 562), new Point(430, 562)),
-						array(new Point(430, 562), new Point(430, 512)),
-						array(new Point(430, 512), new Point(250, 512)),
-						array(new Point(250, 512), new Point(250, 252)),
-						array(new Point(250, 252), new Point(470, 252)),
-						array(new Point(470, 252), new Point(470, 332)),
-						array(new Point(470, 332), new Point(520, 332)),
-						array(new Point(520, 332), new Point(520, 202)),
-						array(new Point(520, 202), new Point(150, 202))
-					),
-					'cubic_splines' => array()
+						array(new Point(150, 202), new Point(150, 252)), array(new Point(150, 252), new Point(200, 252)), array(new Point(200, 252), new Point(200, 832)), array(new Point(200, 832), new Point(150, 832)), 
+						array(new Point(200, 832), new Point(150, 832)), array(new Point(150, 832), new Point(150, 882)), array(new Point(150, 882), new Point(520, 882)), array(new Point(520, 882), new Point(520, 752)), 
+						array(new Point(520, 882), new Point(520, 752)), array(new Point(520, 752), new Point(470, 752)), array(new Point(470, 752), new Point(470, 832)), array(new Point(470, 832), new Point(250, 832)), 
+						array(new Point(470, 832), new Point(250, 832)), array(new Point(250, 832), new Point(250, 562)), array(new Point(250, 562), new Point(430, 562)), array(new Point(430, 562), new Point(430, 512)), 
+						array(new Point(430, 562), new Point(430, 512)), array(new Point(430, 512), new Point(250, 512)), array(new Point(250, 512), new Point(250, 252)), array(new Point(250, 252), new Point(470, 252)), 
+						array(new Point(250, 252), new Point(470, 252)), array(new Point(470, 252), new Point(470, 332)), array(new Point(470, 332), new Point(520, 332)), array(new Point(520, 332), new Point(520, 202)), 
+						array(new Point(520, 332), new Point(520, 202)), array(new Point(520, 202), new Point(150, 202))
+					)
 				);
 				break;
 			case 'Q':
 				$this->glyphdata = array(
-					'lines' => array(
-						array(new Point(130, 722), new Point(200, 812)),
-						array(new Point(200, 812), new Point(490, 812)),
-						array(new Point(490, 812), new Point(540, 872)),
-						array(new Point(540, 872), new Point(630, 872)),
-						array(new Point(630, 872), new Point(570, 802)),
-						array(new Point(570, 802), new Point(640, 732)),
-						array(new Point(640, 732), new Point(640, 342)),
-						array(new Point(640, 342), new Point(561, 274)),
-						array(new Point(561, 274), new Point(200, 272)),
-						array(new Point(200, 272), new Point(130, 342)),
-						array(new Point(130, 342), new Point(130, 722)),
-						array(new Point(200, 712), new Point(240, 752)),
-						array(new Point(240, 752), new Point(440, 752)),
-						array(new Point(440, 752), new Point(400, 692)),
-						array(new Point(400, 692), new Point(490, 692)),
-						array(new Point(490, 692), new Point(530, 752)),
-						array(new Point(530, 752), new Point(570, 702)),
-						array(new Point(570, 702), new Point(570, 362)),
-						array(new Point(570, 362), new Point(520, 322)),
-						array(new Point(520, 322), new Point(250, 322)),
-						array(new Point(250, 322), new Point(200, 362))
-					),
 					'cubic_splines' => array(
 						array(new Point(200, 362), new Point(198, 474), new Point(201, 680), new Point(200, 712))
+					),
+					'lines' => array(
+						array(new Point(130, 722), new Point(200, 812)), array(new Point(200, 812), new Point(490, 812)), array(new Point(490, 812), new Point(540, 872)), array(new Point(540, 872), new Point(630, 872)), 
+						array(new Point(540, 872), new Point(630, 872)), array(new Point(630, 872), new Point(570, 802)), array(new Point(570, 802), new Point(640, 732)), array(new Point(640, 732), new Point(640, 342)), 
+						array(new Point(640, 732), new Point(640, 342)), array(new Point(640, 342), new Point(561, 274)), array(new Point(561, 274), new Point(200, 272)), array(new Point(200, 272), new Point(130, 342)), 
+						array(new Point(200, 272), new Point(130, 342)), array(new Point(130, 342), new Point(130, 722)), array(new Point(200, 712), new Point(240, 752)), array(new Point(240, 752), new Point(440, 752)), 
+						array(new Point(240, 752), new Point(440, 752)), array(new Point(440, 752), new Point(400, 692)), array(new Point(400, 692), new Point(490, 692)), array(new Point(490, 692), new Point(530, 752)), 
+						array(new Point(490, 692), new Point(530, 752)), array(new Point(530, 752), new Point(570, 702)), array(new Point(570, 702), new Point(570, 362)), array(new Point(570, 362), new Point(520, 322)), 
+						array(new Point(570, 362), new Point(520, 322)), array(new Point(520, 322), new Point(250, 322)), array(new Point(250, 322), new Point(200, 362))
 					)
 				);
 				break;
 			default:
 				break;
 		}
-	 }
+	}
 	 
 	 
-	/* Scales the glyphs correctly such that they fit. */
+	/* Scales the glyphs correctly such that it fits with proportional
+	 * margins on all sides into the glyph rectangle.
+	 */
 	private function adjust() {
 		if (!$this->glyphdata)
 			return False;
@@ -720,29 +549,77 @@ class Glyph extends Canvas {
 		/* Translate glyph to the top left corner, such that the 
 		 * smallest x and y value both become zero
 		 */
-		/* Get smallest components. min() doesn't work here. */
-		$minx = $miny = PHP_INT_MAX;
-		foreach ($this->glyphdata as $shapetype => $shapearray) {
-			foreach ($shapearray as $i => $shape) {
-				foreach ($shape as $p) {
-					$minx = ($minx > $p->x ? $p->x : $minx);
-					$miny = ($miny > $p->y ? $p->y : $miny);
-				}
-			}
-		}
-		echo "Min (x,y) found : (x=$minx, y=$miny)";
-		$this->_translate(-$minx, -$miny);
-		$this->_scale(0.3, 0.3);
+		$bpoints = $this->bounding_points();
+		/* Get the height of our glyph */
+		$dy = $bpoints['max']->y - $bpoints['min']->y;
+		/* And the width */
+		$dx = $bpoints['max']->x - $bpoints['min']->x;
+		//echo "Height of glyph: $dy <br /> Width of glyph: $dx <br />";
+		
+		/* Determine which dimension is critical for resizing. Width or height. Take the smaller. */
+		$f1 = $this->width/$dx; $f2 = $this->height/$dy;
+		/* In case the width and/or length is taller then the default measures we will
+		 * scale the glyph larger. Works the same. 
+		 */
+		$cfactor = $f1 > $f2 ? $f2 : $f1;
+		$cfactor -= 0.001; /* Guessing some error margin. This is essential */
+		$this->_translate(-$bpoints['min']->x, -$bpoints['min']->y);
+		$this->_scale($cfactor, $cfactor);
 	}
 	
 	public function draw_glyph() {
 		$this->adjust();
 		
-		foreach ($this->glyphdata['lines'] as $line)
-			$this->line($line);
+		foreach ($this->glyphdata as $shapetype => $shapearray) {
+			switch ($shapetype) {
+				case 'lines':
+					foreach ($this->glyphdata[$shapetype] as $line)
+						$this->line($line);
+					break;
+				case 'cubic_splines':
+					foreach ($this->glyphdata[$shapetype] as $spline)
+						$this->spline($spline);
+					break;
+				default:
+					throw new Exception("Invalid shapetype in draw_glyph()");
+					break;
+			}
+		}
+	}
+	
+	public function count_glyphdata() {
+		echo "Glyph data count: ".count($this->glyphdata['lines'])." and ".count($this->glyphdata['cubic_splines'])."<br />";
+	}
+	
+	/* Gets the bounding rectangle of the glyphdata.
+	 * Returns an array of 2 points: The minum coordinates and
+	 * the maximum coordinates.
+	 */
+	private function bounding_points() {
+		$minp = $this->extremas("min");
+		$maxp = $this->extremas("max");
+		return array('min' => new Point($minp[0], $minp[1]),
+					 'max' => new Point($maxp[0], $maxp[1]));
+	}
+	
+	/* Maybe I reinvent here something. But don't want to go searching for existing solutions. ;)
+	 * I made it because Python lacks (real) ternary operators and I wanted to play a bit.
+	 */
+	private function extremas($which="max") {
+		if(!in_array($which, array("max", "min")))
+			return False;
 			
-		foreach ($this->glyphdata['cubic_splines'] as $spline)
-			$this->spline($spline);
+		/* Find extremas */
+		$exx = $exy = ($which == "max") ? -100000000 : PHP_INT_MAX;
+		foreach ($this->glyphdata as $shapetype => $shapearray) {
+			foreach ($shapearray as $i => $shape) {
+				foreach ($shape as $p) {
+					$exx = ($which == "max") ? ($exx < $p->x ? $p->x : $exx) : ($exx > $p->x ? $p->x : $exx);
+					$exy = ($which == "max") ? ($exy < $p->y ? $p->y : $exy) : ($exy > $p->y ? $p->y : $exy);
+				}
+			}
+		}
+		return array($exx, $exy);
 	}
 	
 	/* Rudimentary function to fill the glyph (only works when the glyph's shape
@@ -763,16 +640,19 @@ class Glyph extends Canvas {
 	
 	private function _skew($a) {}
 	
-	private function _scale($sx, $sy) {
-		$code = sprintf('if (get_class($v) == "Point") { $v = new Point($v->x*%s, $v->y*%s); }', $sx, $sy);
-		array_walk_recursive($this->glyphdata, create_function('&$v, $k', $code));
+	private function _scale($sx, $sy) {		
+		$code = sprintf('if ($v instanceof Point) { $v->x = intval($v->x*%s); $v->y = intval($v->y*%s); }', $sx, $sy);
+		$func = create_function('&$v, $k', $code);
+		array_walk_recursive($this->glyphdata, $func);
+		
 	}
 	
 	private function _shear($a) {}
 	
 	private function _translate($dx, $dy) {
-		$code = sprintf('if (get_class($v) == "Point") { $v = new Point($v->x+%s, $v->y+%s); }', $dx, $dy);
-		array_walk_recursive($this->glyphdata, create_function('&$v, $k', $code));
+		$code = sprintf('if ($v instanceof Point) { $v->x += %s; $v->y += %s; }', $dx, $dy);
+		$func = create_function('&$v, $k', $code);
+		array_walk_recursive($this->glyphdata, $func);
 	}
 	
 	public function blur() {
@@ -786,19 +666,39 @@ class Glyph extends Canvas {
  * a Captcha object. A captcha object has methods to write it's internal state as .bbm and .png files.
  * A object of this class can see as a "stamp", because Captcha implements a method called reload() that
  * recalculates a complete new captcha based on the current configuration. This means that the all applications only need one captcha object.
+ * Therefore this class is designed after the Singleton design pattern. It's only possible to construct one single instance of 
+ * this class. Everything else is a waste of memory.
  * 
  * The Captcha class has a alphabet of glyphs and a array of glyphs (That it eventually exports as image). These array elements
  * are Glyph() instances. The glyphs are ony plotted when write_image() is called.
  */
- 
+
 class Captcha {
+	private static $instance;
+	
 	private $width;
 	private $height;
 	
-	public function __construct($width=400, $height=150) {
+	private function __construct($width=400, $height=150) {
 		$this->width = $width;
 		$this->height = $height;
 		$this->init_captcha();
+	}
+	
+	/* 
+	 * All newly calls to get_instance() 
+	 * return the same object. Singleton
+	 * design pattern.
+	 * 
+	 * Make sure that you take care of your instance ;)
+	 */
+	public static function get_instance() {
+		if (!isset(self::$instance)) {
+			$c = __CLASS__;
+			self::$instance = new $c();
+			// Or easier: self::$instance = new Captcha();
+		}
+		return self::$instance;
 	}
 	
 	public function tests() {
@@ -815,9 +715,22 @@ class Captcha {
 				$this->write_image('out', $format='ppm');
 				break;
 			case 'test-2':
-				$g = new Glyph('y');
+				$g = new Glyph('W');
 				$g->draw_glyph();
-				$this->copy_glyph(0, 0, $g->get_bitmap());
+				$this->copy_glyph(30, 0, $g->get_bitmap());
+				
+				$gg = new Glyph('H');
+				$gg->draw_glyph();
+				$this->copy_glyph(30, 100, $gg->get_bitmap());
+				
+				$ggg = new Glyph('a');
+				$ggg->draw_glyph();
+				$this->copy_glyph(30, 200, $ggg->get_bitmap());
+				
+				$gggg = new Glyph('S');
+				$gggg->draw_glyph();
+				$this->copy_glyph(30, 300, $gggg->get_bitmap());
+				
 				$this->write_image('glyph', $format='ppm');
 				break;
 			default:

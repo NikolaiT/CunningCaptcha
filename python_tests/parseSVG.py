@@ -69,9 +69,9 @@ def parse_path(fname):
                 # with the start of the initial segment of the subpath.
                 lines.append([data[i-1], data[0]])
         
-        cleaned = clean(cubic_bezier=c_splines,
-                     quadratic_bezier=q_splines,
-                     simple_lines=lines)
+        cleaned = clean(cubic_splines=c_splines,
+                     quadratic_splines=q_splines,
+                     lines=lines)
             
         yield cleaned
                      
