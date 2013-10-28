@@ -1,5 +1,14 @@
 <?php
 
+/* 
+ * Classes that plot captchas without any dependencies. All pure PHP without using
+ * any first, second or third class image processing libraries. 
+ * 
+ * @@Author: Nikolai Tschacher
+ * @@Date: October 2013
+ * @@Contact: incolumitas.com
+ */
+ 
 error_reporting(E_ALL);
 
 /* Some handy debugging functions. Send me a letter for Christmas! */
@@ -46,7 +55,7 @@ class Point {
  * spline. They differ mostly in performance and smothness of drawing.
  */
  
-class Canvas {
+abstract class Canvas {
 	
 	const STEP = 0.001;
 	const NUM_SEGMENTS = 15;
@@ -58,7 +67,7 @@ class Canvas {
 					  * geometrical primitive methods and set_pixel().
 					  */
 	
-	/* Lookup-tables for Bézier coeffizients */
+	/* Lookup-tables for Bézier coefficients */
 	private $quad_lut;
 	private $cub_lut;
 	
@@ -68,8 +77,11 @@ class Canvas {
 		$this->initbm();
 	}
 	
+	/* All classes that extend Canvas need to draw something */
+	abstract protected function draw();
+	
 	private function initbm() {
-		$this->bitmap = array_fill(0, $this->height, array_fill(0, $this->width, '255 255 255')); /* init the bitmap */
+		$this->bitmap = array_fill(0, $this->height, array_fill(0, $this->width, '255 255 255')); /* inits the bitmap */
 	}
 	
 	public function get_bitmap() {
@@ -78,6 +90,26 @@ class Canvas {
 	
 	protected final function set_pixel($x, $y, $color='0 0 0') {
 		$this->bitmap[$y][$x] = $color;
+	}
+	
+	/* 
+	 * Copy the the two dimensional array with the
+	 * offset given by $dx and $dy into the bitmap.
+	 * There might be a built-in function for this task such as array_merge()
+	 * or something that is better.
+	 */
+	protected final function merge($dy=0, $dx=0, $array2d) {
+		$height = count($array2d)-1;
+		$width = count($array2d[0])-1;
+		/* Check wheter the glyph fits */
+		if ($height+$dy > $this->height || $width+$dx > $this->width)
+			return False;
+		/* If it fits I sits */
+		foreach (range(0, $height) as $i) {
+			foreach (range(0, $width) as $j) {
+				$this->bitmap[$i+$dy][$j+$dx] = $array2d[$i][$j];
+			}
+		}
 	}
 	
 	/* All the different rasterization algorithms. They differ in performance and 
@@ -227,7 +259,7 @@ class Canvas {
 		}
 	}
 	
-	public function line($points) {
+	public final function line($points) {
 		if (count($points) != 2)
 			return False;
 		
@@ -258,7 +290,7 @@ class Canvas {
 		}
 	}
 	
-	public function spline($points, $algo='direct') {
+	public final function spline($points, $algo='direct') {
 		foreach ($points as $p) {
 			if (get_class($p) != 'Point')
 				return False;
@@ -298,7 +330,13 @@ class Canvas {
 }
 
 /*
- * The abstract class Glyph represents a generic Glyph. A glyph inherits from the class Canvas.
+ * The class Glyph represents a generic Glyph. A glyph inherits from the class Canvas.
+ * It is very important to differentiate between the parent class property $this->get_bitmap()
+ * and the Glyph class property glyphdata! Whereas glyphdata holds all the information to draw
+ * a glyph (consisting of Bézier splines and simple lines) the bitmap is just an two dimensional
+ * array of pixels that can be manipulated with the methods in the class Canvas(). This means
+ * that the most methods in Glyph apply some function on glyphdata, not the bitmap!
+ * 
  * This class implements a wide range of different 'blur' techniques that try to confuse computational
  * approaches like OCR to recognize the glyph. Therefore there are linear transformations and a wide range of parameters that
  * are randomly chosen. All these bluring techniques can be applied with the blur() function.
@@ -325,7 +363,7 @@ class Glyph extends Canvas {
 		/* Theres a python function that generates this PHP switch statement,
 		 * because the glyphdata may easily change if I redesign the glyph in
 		 * the future.
-		 * It's certainly a bad idea to mix data with code as here, but in order
+		 * It's certainly a bad idea to mix data with code as done here, but in order
 		 * to speed things up, this will have to stay in memory ;)
 		 */
 		
@@ -539,8 +577,9 @@ class Glyph extends Canvas {
 	}
 	 
 	 
-	/* Scales the glyphs correctly such that it fits with proportional
-	 * margins on all sides into the glyph rectangle.
+	/* 
+	 * Scales the glyphs correctly such that it fits with proportional
+	 * margins on all sides into the glyphs bounding rectangle.
 	 */
 	private function adjust() {
 		if (!$this->glyphdata)
@@ -586,6 +625,8 @@ class Glyph extends Canvas {
 			}
 		}
 	}
+	
+	public function draw() { $this->draw_glyph(); }
 	
 	public function count_glyphdata() {
 		echo "Glyph data count: ".count($this->glyphdata['lines'])." and ".count($this->glyphdata['cubic_splines'])."<br />";
@@ -655,7 +696,11 @@ class Glyph extends Canvas {
 		array_walk_recursive($this->glyphdata, $func);
 	}
 	
-	public function blur() {
+	/* 
+	 * Apply bluring techniques on the glyph! The sophistication of
+	 * this method essentially determines the strenth of the captcha.
+	 */
+	private function blur() {
 		
 	}
 }
@@ -670,19 +715,22 @@ class Glyph extends Canvas {
  * this class. Everything else is a waste of memory.
  * 
  * The Captcha class has a alphabet of glyphs and a array of glyphs (That it eventually exports as image). These array elements
- * are Glyph() instances. The glyphs are ony plotted when write_image() is called.
+ * are Glyph() instances. The glyphs are ony plotted when write_image() is called. Captcha inherits also from Canvas! This enables
+ * the Captcha instance to manipulate it's bitmap AFTER all glyphs have been merged to it. So there is a second layer of randomization
+ * on the bitmap, that wouldn't have existed if just glyph sized rectangles are planted into the captcha. There wouldn't be cross glyhp
+ * noise. I hope you understand. 
  */
 
-class Captcha {
+class Captcha extends Canvas {
 	private static $instance;
 	
-	private $width;
-	private $height;
-	
-	private function __construct($width=400, $height=150) {
-		$this->width = $width;
-		$this->height = $height;
-		$this->init_captcha();
+	public function __construct($width=400, $height=150) {
+		/* This check needs to be here in order to hold the constructor public (inheritance).
+		 * while keeping Singleton design pattern.
+		 */
+		if(isset(self::$instance))
+			throw new Exception('Only one instance of Captcha allowed!');
+		parent::__construct($width, $height);
 	}
 	
 	/* 
@@ -692,7 +740,7 @@ class Captcha {
 	 * 
 	 * Make sure that you take care of your instance ;)
 	 */
-	public static function get_instance() {
+	public static function get_instance($width=400, $height=150) {
 		if (!isset(self::$instance)) {
 			$c = __CLASS__;
 			self::$instance = new $c();
@@ -700,6 +748,9 @@ class Captcha {
 		}
 		return self::$instance;
 	}
+	
+	/* Implement abstract draw() function */
+	public function draw() {}
 	
 	public function tests() {
 		/* Tests. */
@@ -716,49 +767,25 @@ class Captcha {
 				break;
 			case 'test-2':
 				$g = new Glyph('W');
-				$g->draw_glyph();
-				$this->copy_glyph(30, 0, $g->get_bitmap());
+				$g->draw();
+				$this->merge(30, 0, $g->get_bitmap());
 				
 				$gg = new Glyph('H');
-				$gg->draw_glyph();
-				$this->copy_glyph(30, 100, $gg->get_bitmap());
+				$gg->draw();
+				$this->merge(30, 100, $gg->get_bitmap());
 				
 				$ggg = new Glyph('a');
-				$ggg->draw_glyph();
-				$this->copy_glyph(30, 200, $ggg->get_bitmap());
+				$ggg->draw();
+				$this->merge(30, 200, $ggg->get_bitmap());
 				
 				$gggg = new Glyph('S');
-				$gggg->draw_glyph();
-				$this->copy_glyph(30, 300, $gggg->get_bitmap());
+				$gggg->draw();
+				$this->merge(30, 300, $gggg->get_bitmap());
 				
 				$this->write_image('glyph', $format='ppm');
 				break;
 			default:
 				break;
-		}
-	}
-	
-	private function init_captcha() {
-		$this->bitmap = array_fill(0, $this->height, array_fill(0, $this->width, '255 255 255')); /* init the bitmap */
-	}
-	
-	/* 
-	 * Copy the glyph data (two dimensional array) with the
-	 * offset given by $dx and $dy into the bitmap of captcha.
-	 * There might be a built-in function for this task such as array_merge()
-	 * or something that is better.
-	 */
-	private function copy_glyph($dy=0, $dx=0, $glyphdata) {
-		$height = count($glyphdata)-1;
-		$width = count($glyphdata[0])-1;
-		/* Check wheter the glyph fits */
-		if ($height+$dy > $this->height || $width+$dx > $this->width)
-			return False;
-		/* If it fits I sits */
-		foreach (range(0, $height) as $i) {
-			foreach (range(0, $width) as $j) {
-				$this->bitmap[$i+$dy][$j+$dx] = $glyphdata[$i][$j];
-			}
 		}
 	}
 	
@@ -780,7 +807,7 @@ class Captcha {
 				fwrite($h, sprintf("P3\n%u %u\n255\n", $this->width, $this->height))
 															or exit('fwrite() failed.');
 				/* Write all pixels */
-				foreach ($this->bitmap as $scanline) {
+				foreach ($this->get_bitmap() as $scanline) {
 					foreach ($scanline as $pixel) {
 						fwrite($h, $pixel."\t");
 					}
