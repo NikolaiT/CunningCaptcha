@@ -720,13 +720,26 @@ class Glyph extends Canvas {
 	private function _fill($startp) {}
 	 
 	
-	/* linear transformations. array_walk_recursive applies the callback only on the leaves. That's good.
+	/*
+	 * http://mathworld.wolfram.com/AffineTransformation.html
+	 * 
+	 * Affine transformations. An affine transformation is equivalent to
+	 * the composed effects of translation, rotation, isotropic scaling and shear.
+	 * While an affine transformation preserves proportions on lines,
+	 * it does not necessarily preserve angles or lengths.
+	 * 
+	 * array_walk_recursive applies the callback only on the leaves. That's good.
 	 * These functions are on purpose in the Glyph class (could also be
 	 * in Canvas) because they refer to the splines and lines that constitute
-	 * a Glyph.  
+	 * a Glyph.
 	 */
 	
-	private function _rotate($a) {}
+	private function _rotate($a) {
+		// (x, y) = cos(a)*x - sin(a)*y, sin(a)*x + cos(a)*y
+		$code = sprintf('if ($v instanceof Point) { $v->x = intval(cos(%s)*$v->x - sin(%s)*$v->y); $v->y = intval(sin(%s)*$v->x + cos(%s)*$v->y); }', $a, $a, $a, $a);
+		$func = create_function('&$v, $k', $code);
+		array_walk_recursive($this->glyphdata, $func);
+	}
 	
 	private function _skew($a) {
 		$code = sprintf('if ($v instanceof Point) { $v->x = intval($v->x+sin(%s)*$v->y);}', $a);
@@ -734,12 +747,18 @@ class Glyph extends Canvas {
 		array_walk_recursive($this->glyphdata, $func);
 	}
 	
+	/*
+	 * dilation.
+	 */
 	private function _scale($sx, $sy) {
 		$code = sprintf('if ($v instanceof Point) { $v->x = intval($v->x*%s); $v->y = intval($v->y*%s); }', $sx, $sy);
 		$func = create_function('&$v, $k', $code);
 		array_walk_recursive($this->glyphdata, $func);
 	}
 	
+	/* 
+	 * non-uniform scaling in some directions.
+	 */
 	private function _shear($kx, $ky) {
 		$code = sprintf('if ($v instanceof Point) { $v->x = intval($v->x+$v->y*%s); $v->y = intval($v->y+$v->x*%s); }', $ky, $kx);
 		$func = create_function('&$v, $k', $code);
@@ -760,8 +779,10 @@ class Glyph extends Canvas {
 		//$shear = rand(-6, 6)/10;
 		//$this->_shear($shear, $shear);
 		
-		$skew = rand(0, 90);
-		$this->_skew($skew);
+		//$skew = rand(0, 90);
+		//$this->_skew($skew);
+		
+		$this->_rotate(rand(-5, 4)/10);
 		
 		//$scale = rand(5, 30) / 10;
 		//$this->_scale($scale, $scale);
@@ -806,7 +827,7 @@ class Captcha extends Canvas {
 		 */
 		if(isset(self::$instance))
 			throw new Exception('Only one instance of Captcha allowed!');
-		parent::__construct((new Glyph())->width*$clength + 100, $height);
+		parent::__construct((new Glyph())->width*$clength, $height);
 		
 		$this->stamp = new Glyph();
 		$this->clength = $clength;
