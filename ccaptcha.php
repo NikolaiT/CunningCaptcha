@@ -12,7 +12,7 @@ D(generateCaptchas($path='/tmp', $number=20));
  * @@Date: October 2013
  * @@Contact: incolumitas.com
  */
- 
+
 error_reporting(E_ALL);
 
 /* ------------------- This is the function you are going to use ------------------- */
