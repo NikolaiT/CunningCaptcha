@@ -1,16 +1,57 @@
 <?php
 
+D(generateCaptchas($path='/tmp', $number=20));
+//speedtest();
+
 /* 
  * Classes that plot captchas without any dependencies. All pure PHP without using
  * any first, second or third class image processing libraries.
  * 
- * @@Version: 0.0
+ * @@Version: 0.1
  * @@Author: Nikolai Tschacher
  * @@Date: October 2013
  * @@Contact: incolumitas.com
  */
  
 error_reporting(E_ALL);
+
+/* ------------------- This is the function you are going to use ------------------- */
+
+/*
+ * $path The path to the folder where the resulting captch images are generated.
+ * $number The number of unique captchas to generate.
+ * $captchalength The length of the captcha string.
+ * 
+ * return value This function returns an array of full path names to the captcha as key and 
+ * 				it's according captcha word (That what the user has to enter) as value.
+ * 				The captcha base name is a (pretty) random string of length 12, such that
+ * 				users can't download all captchas. This means that there needs to be a
+ * 				upper limit of reloads before an IP address get's blocked from inspecting
+ * 				other captchas (5 for example).
+ */
+function generateCaptchas($path='', $number=10, $captchalength=5) {
+	if (is_dir($path) === false)
+		throw new Exception("Path $path is not a valid directory.");
+	else if (is_writable($path) === false)
+		throw new Exception("Path $path is not writable.");
+	
+	/* Generate the captchas */
+	$captcha = Captcha::get_instance($clength=$captchalength);
+	foreach (range(0, $number) as $i) {
+		$fname = sprintf("%s/%s", $path, substr(sha1(random_string().$i), 10, 13));
+		$captchas[$fname] = $captcha->reload($fname);
+	}
+	return $captchas;
+}
+
+/* ------------------- From here on comes internal stuff, that you shouldn't change ------------------- */
+
+/* 
+ * .
+ * .
+ * .
+ * .
+ */
 
 /* Some handy debugging functions. Send me a letter for Christmas! */
 function D($a) {
@@ -19,7 +60,9 @@ function D($a) {
 	print "</pre>";
 }
 
-/* shuffles an array while preserving key=>value pairs. Taken from php.net */
+/* 
+ * Shuffles an array while preserving key=>value pairs. Taken from php.net 
+ */
 function shuffle_assoc(&$array) {
 	$keys = array_keys($array);
 	
@@ -33,10 +76,34 @@ function shuffle_assoc(&$array) {
 	return true;
 }
 
-/* Tests */
-$captcha = Captcha::get_instance();
-$captcha->draw();
+/*
+ * Generate a random string. Foundn on stackoverflow.com 
+ */
+function random_string($length=15) {
+	$keys = array_merge(range(0,9), range('a', 'z'));
+	$key = '';
+	for ($i=0; $i < $length; $i++) {
+		$key .= $keys[array_rand($keys)];
+	}
+	return $key;
+}
 
+/* 
+ * Test the speed of the Bézier plotting functions. 
+ */
+function speedtest() {
+	for ($i = 0; $i < 500; $i++) {
+		$splines[] = array(new Point(rand(1,500), rand(1,500)), new Point(rand(1,500), rand(1,500)), new Point(rand(1,500), rand(1,500)), new Point(rand(1,500), rand(1,500)));
+	}
+	$g = Glyph::get_instance();
+	$start = microtime(true);
+	foreach ($splines as $spline) {
+		$g->spline($spline, $algo="approx");
+		//$g->line(array(new Point(rand(1,500), rand(1,500)),new Point(rand(1,500), rand(1,500))));s
+	}
+	$end = microtime(true);
+	printf("Completed speedtest in %.6f seconds<br />", $end-$start);
+}
 
 /* 
  * A simple class to represent points. Public members, since working with
@@ -63,7 +130,6 @@ class Point {
  * three points and cubic Bézier splines respectively arrays of 4 points.
  */
 
-
 /*
  * Describes the class Canvas which implements algorithms to rasterize geometrical primitives such
  * as quadratic and cubic Bézier splines and straight lines. There may be more than one algorithm for each
@@ -86,7 +152,7 @@ abstract class Canvas {
 	private $quad_lut;
 	private $cub_lut;
 	
-	public function __construct($width=100, $height=100) {
+	protected function __construct($width=100, $height=100) {
 		$this->height = $height;
 		$this->width = $width;
 		$this->initbm();
@@ -96,14 +162,22 @@ abstract class Canvas {
 	abstract protected function draw();
 	
 	protected function initbm() {
-		$this->bitmap = array_fill(0, $this->height, array_fill(0, $this->width, '255 255 255')); /* inits the bitmap */
+		unset($this->bitmap);
 	}
 	
 	public function get_bitmap() {
 		return $this->bitmap;
 	}
 	
-	protected final function set_pixel($x, $y, $color='0 0 0') {
+	public function get_width() {
+		return $this->width;
+	}
+	
+	public function get_height() {
+		return $this->height;
+	}
+	
+	protected final function set_pixel($x, $y, $color=0) {
 		$this->bitmap[$y][$x] = $color;
 	}
 	
@@ -112,30 +186,26 @@ abstract class Canvas {
 	 * offset given by $dx and $dy into the bitmap.
 	 * There might be a built-in function for this task such as array_merge()
 	 * or something that is better.
-	 * If $only is specified then only pixels with it's value are copied.
-	 * If $ignorebounds is true, then the function ignores indices that are 
-	 * taller than $this->bitmap (But doesn't set the elements either!)
 	 */
-	protected final function merge($dy=0, $dx=0, $array2d, $only='0 0 0', $ignorebounds=False) {
-		$height = count($array2d)-1;
-		$width = count($array2d[0])-1;
-		/* Check wheter the glyph fits */
-		if ($height+$dy > $this->height || $width+$dx > $this->width)
-			return False;
+	protected final function merge($dy=0, $dx=0, $array2d) {
 		/* If it fits I sits */
-		foreach (range(0, $height) as $i) {
-			foreach (range(0, $width) as $j) {
-				if ($array2d[$i][$j] === $only)
-					$this->bitmap[$i+$dy][$j+$dx] = $array2d[$i][$j];
+		foreach ($array2d as $i => $row) { // $i is the row-index
+			foreach ($row as $j => $pixel) { // $j is the column index
+				/* Check wheter the glyph fits */
+				if ($i+$dy > $this->height || $j+$dx > $this->width)
+					return False;
+				$this->bitmap[$i+$dy][$j+$dx] = 0;
 			}
 		}
 	}
 	
-	/* All the different rasterization algorithms. They differ in performance and 
-	 * granularity of drawing as well as the smoothness of the curve
+	/* 
+	 * All the different rasterization algorithms. They differ in performance and 
+	 * granularity of the resulting splines as well as in the smoothness of the curve.
 	 */
 	 
-	/* The next two functions calculate the quadratic and cubic bezier points directly.
+	/* 
+	 * The next two functions calculate the quadratic and cubic bezier points directly.
 	 */
 	
 	private function _direct_quad_bez($p1, $p2, $p3) {
@@ -166,7 +236,7 @@ abstract class Canvas {
 		}
 	}
 	
-	/* Bézier plotting with look-up tables */
+	/* Bézier plotting with look-up tables. Might still be rather slow. */
 	
 	private function _gen_quad_LUT() {
 		$t = 0;
@@ -214,28 +284,25 @@ abstract class Canvas {
 		}
 	}
 	
-	/* The fastest one. Approximates the curve. */
+	/* The fastest one. Approximates the curve with simple lines. */
 	
 	private function _approx_quad_bez($p1, $p2, $p3) {
-		$lp = array();
-		$lp[] = $p1;
-		foreach (range(0, self::NUM_SEGMENTS) as $i) {
+		$last = $p1;
+		for ($i = 0; $i < self::NUM_SEGMENTS; $i++) {
 			$t = $i / self::NUM_SEGMENTS;
 			$t2 = $t*$t;
 			$mt = 1-$t;
 			$mt2 = $mt*$mt;
 			$x = intval($p1->x*$mt2 + $p2->x*2*$mt*$t + $p3->x*$t2);
 			$y = intval($p1->y*$mt2 + $p2->y*2*$mt*$t + $p3->y*$t2);
-			$lp[] = new Point($x,$y);
-		}	
-		foreach (range(0, count($lp)-2) as $i)
-			$this->line(array($lp[$i], $lp[$i+1]));
+			$this->line(array($last, new Point($x, $y)));
+			$last = new Point($x, $y);
+		}
 	}
 
 	private function _approx_cub_bez($p1, $p2, $p3, $p4) {
-		$lp = array();
-		$lp[] = $p1;
-		foreach (range(0, self::NUM_SEGMENTS) as $i) {
+		$last = $p1;
+		for ($i = 0; $i < self::NUM_SEGMENTS; $i++) {
 			$t = $i / self::NUM_SEGMENTS;
 			$t2 = $t * $t;
 			$t3 = $t2 * $t;
@@ -244,10 +311,9 @@ abstract class Canvas {
 			$mt3 = $mt2 * $mt;
 			$x = intval($p1->x*$mt3 + 3*$p2->x*$mt2*$t + 3*$p3->x*$mt*$t2 + $p4->x*$t3);
 			$y = intval($p1->y*$mt3 + 3*$p2->y*$mt2*$t + 3*$p3->y*$mt*$t2 + $p4->y*$t3);
-			$lp[] = new Point($x,$y);
+			$this->line(array($last, new Point($x, $y)));
+			$last = new Point($x, $y);
 		}
-		foreach (range(0, count($lp)-2) as $i)
-			$this->line(array($lp[$i], $lp[$i+1]));
 	}
 	
 	private function plot_casteljau($points) {
@@ -274,6 +340,7 @@ abstract class Canvas {
 				$y = (1-$t) * $points[$i]->y + $t * $points[$i+1]->y;
 				$newpoints[] = new Point($x, $y);
 			}
+		/* Recursive step */
 		$this->_casteljau($newpoints, $t);
 		}
 	}
@@ -289,8 +356,8 @@ abstract class Canvas {
 		
 		$dx = abs($x1-$x0);
 		$dy = -abs($y1-$y0);
-		$sx = $x0<$x1 ? 1 : -1;
-		$sy = $y0<$y1 ? 1 : -1;
+		$sx = $x0 < $x1 ? 1 : -1;
+		$sy = $y0 < $y1 ? 1 : -1;
 		$err = $dx+$dy;
 		$e2 = 1;
 		while (True) {
@@ -309,7 +376,7 @@ abstract class Canvas {
 		}
 	}
 	
-	public final function spline($points, $algo='direct') {
+	public final function spline($points, $algo='approx') {
 		foreach ($points as $p) {
 			if (get_class($p) != 'Point')
 				return False;
@@ -321,24 +388,26 @@ abstract class Canvas {
 		/* Somehow ugly but what can you do? 
 		 * Send me mail, in case you have a hint: admin [(at)] incolumitas.com
 		 */
+		$plen = count($points);
 		switch ($algo) {
 			case 'direct':
-				if (count($points) == 3)
+				if ($plen == 3)
 					$this->_direct_quad_bez($points[0], $points[1], $points[2]);
-				if (count($points) == 4)
+				if ($plen == 4)
 					$this->_direct_cub_bez($points[0], $points[1], $points[2], $points[3]);
 				break;
 			case 'lut':
-				if (count($points) == 3)
+				if ($plen == 3)
 					$this->_lut_quad_bez($points[0], $points[1], $points[2]);
-				if (count($points) == 4)
+				if ($plen == 4)
 					$this->_lut_cub_bez($points[0], $points[1], $points[2], $points[3]);
 				break;
 			case 'approx':
-				if (count($points) == 3)
+				if ($plen == 3)
 					$this->_approx_quad_bez($points[0], $points[1], $points[2]);
-				if (count($points) == 4)
+				if ($plen == 4)
 					$this->_approx_cub_bez($points[0], $points[1], $points[2], $points[3]);
+				break;
 			case 'casteljau':
 				$this->plot_casteljau($points);
 				break;
@@ -364,17 +433,27 @@ abstract class Canvas {
  */
  
 class Glyph extends Canvas {
+	private static $instance;
 	
 	private $character;
 	private $glyphdata;
 	
 	private $plotted = False;
 	
-	public function __construct($character='', $width=100, $height=80) {
+	protected function __construct($character, $width, $height) {
+		if (isset(self::$instance))
+			throw new Exception("Glyph is a singleton. Only one instance possible.");
 		parent::__construct($width, $height);
 		$this->character = $character;
 		if ($character !== '')
 			$this->load_glyph($character);
+	}
+	
+	public static function get_instance($character='', $width=100, $height=80) {
+		if (!isset(self::$instance)) {
+			self::$instance = new Glyph($character, $width, $height);
+		}
+		return self::$instance;
 	}
 	
 	/* This function load's the points that constitute the glyph. Maybe it's a design
@@ -382,6 +461,7 @@ class Glyph extends Canvas {
 	 * n = len(alphabet). This would imply a lot of redundant code and unflexible handling
 	 */
 	 public function load_glyph($c) {
+		 unset($this->glyphdata);
 		 $this->character = $c;
 		/* 
 		 * Theres a python function that generates this PHP switch statement,
@@ -638,8 +718,9 @@ class Glyph extends Canvas {
 		 * draw several glyphs on its bitmap. But after each plotting we need to erease
 		 * the bitmap before we draw a new glyph.
 		 */
-		 if ($this->plotted)
+		 if ($this->plotted) {
 			$this->initbm();
+		}
 		
 		$this->blur();
 		$this->adjust();
@@ -776,8 +857,8 @@ class Glyph extends Canvas {
 	 * this method essentially determines the strenth of the captcha.
 	 */
 	private function blur() {
-		//$shear = rand(-6, 6)/10;
-		//$this->_shear($shear, $shear);
+		$shear = rand(-6, 6)/10;
+		$this->_shear($shear, $shear);
 		
 		//$skew = rand(0, 90);
 		//$this->_skew($skew);
@@ -821,15 +902,20 @@ class Captcha extends Canvas {
 	/* Length of the captcha */
 	private $clength = 0;
 	
-	public function __construct($clength=7, $height=150) {
+	/* name of the file to write */
+	private $outfile;
+	
+	public function __construct($clength, $height) {
 		/* This check needs to be here in order to hold the constructor public (inheritance).
 		 * while keeping Singleton design pattern.
 		 */
 		if(isset(self::$instance))
 			throw new Exception('Only one instance of Captcha allowed!');
-		parent::__construct((new Glyph())->width*$clength, $height);
 		
-		$this->stamp = new Glyph();
+		/* Get a glyph instance */
+		$this->stamp = Glyph::get_instance($character='');
+		
+		parent::__construct($this->stamp->get_width()*$clength, $height);
 		$this->clength = $clength;
 	}
 	
@@ -840,10 +926,10 @@ class Captcha extends Canvas {
 	 * 
 	 * Make sure that you take care of your instance ;)
 	 */
-	public static function get_instance($width=400, $height=150) {
+	public static function get_instance($clength=5, $height=150) {
 		if (!isset(self::$instance)) {
 			$c = __CLASS__;
-			self::$instance = new $c();
+			self::$instance = new $c($clength, $height);
 			// Or easier: self::$instance = new Captcha();
 		}
 		return self::$instance;
@@ -854,21 +940,26 @@ class Captcha extends Canvas {
 	 * This function merges a random selection of glyphs into the bitmap and
 	 * returns the according string
      */
-	public function draw() {
+	protected function draw() {
 		/* Take n=length random characters from the alphabet */
 		$randalphabet = explode(', ', self::ALPHABET);
 		shuffle($randalphabet);
 		for ($i = 0; $i < $this->clength; $i++) {
 			$randchars[] = $randalphabet[intval(rand(0, count($randalphabet)-1))];
 		}
-		
+
 		foreach ($randchars as $i => $char) {
 			$this->stamp->load_glyph($char);
 			$this->stamp->draw();
 			$this->merge(rand(0, 50), $i*rand(70, 80), $this->stamp->get_bitmap());
 		}
 		
-		$this->write_image('glyph', $format='ppm');
+		//echo sprintf("[!] Using %u bytes <br />", memory_get_usage());
+		
+		$this->write_image($this->outfile, $format='ppm');
+		
+		/* Return the captcha word as a string */
+		return implode('', $randchars);
 	}
 	
 	public function tests() {
@@ -925,12 +1016,16 @@ class Captcha extends Canvas {
 				/* Writes a colorous ppm image file. It's not compressed */
 				fwrite($h, sprintf("P3\n%u %u\n255\n", $this->width, $this->height))
 															or exit('fwrite() failed.');
+				$bm = $this->get_bitmap();
 				/* Write all pixels */
-				foreach ($this->get_bitmap() as $scanline) {
-					foreach ($scanline as $pixel) {
-						fwrite($h, $pixel."\t");
+				for ($i = 0; $i < $this->height; $i++) {
+					for ($j = 0; $j < $this->width; $j++) {
+						if (isset($bm[$i][$j]))
+							fwrite($h, '0 0 0'."\t");
+						else
+							fwrite($h, '255 255 255'."\t");
 					}
-					fwrite($h, "\n");
+					fwrite($h,"\n");
 				}
 				break;
 			default:
@@ -941,7 +1036,10 @@ class Captcha extends Canvas {
 		fclose($h) or exit('fclose() failed.');
 	}
 	
-	public function reload() {}
+	public function reload($outfile) {
+		$this->outfile = $outfile;
+		$this->initbm();
+		return $this->draw();
+	}
 }
-
 ?>

@@ -187,7 +187,7 @@ class GeometricalPrimitives(tkinter.Canvas):
 			e2 = 2*err
 			if (e2 >= dy):
 				err += dy
-				x0 += sx     
+				x0 += sx
 			if (e2 <= dx):
 				err += dx
 				y0 += sy

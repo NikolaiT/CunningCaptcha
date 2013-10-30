@@ -37,15 +37,15 @@ class Glyph(geoprim.GeometricalPrimitives):
 		self.data = d
 					
 	def R(self, fname):
-		self.data = {'quadratic_bezier': [], 'simple_lines': [], 'cubic_bezier': []}
+		self.data = {'quadratic_splines': [], 'lines': [], 'cubic_splines': []}
 		self.glyph_from_svg(fname)
 				
 	def draw(self):
 		for kw in sorted(self.data.keys()):
-			if kw in ('cubic_bezier', 'quadratic_bezier'):
+			if kw in ('cubic_splines', 'quadratic_splines'):
 				for spline in self.data[kw]:
 					self.bezier(spline, 'approx')
-			elif kw == 'simple_lines':
+			elif kw == 'lines':
 				for line in self.data[kw]:
 					self.line(line)
 	
