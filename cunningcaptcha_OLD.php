@@ -63,7 +63,7 @@ define("CAPTCHA_PNG", plugin_dir_path(__FILE__)."captcha.png");
 
 // Set a filter to add additional input fields for the comment
 add_filter('comment_form_defaults', 'ccaptcha_comment_form_defaults');
-// Add a filter to verify if the captch was correct
+// Add a filter to verify if the captcha was correct
 add_filter('preprocess_comment', 'ccaptcha_check');
 // Add a action hook to add the additioal field to the db
 add_action('comment_post', 'ccaptcha_save_input');
