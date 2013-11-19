@@ -191,14 +191,121 @@ class GeometricalPrimitives(tkinter.Canvas):
 			if (e2 <= dx):
 				err += dx
 				y0 += sy
+				
+def beziersum(spline, t):
+	p1, p2, p3, p4 = spline
+	t2 = t * t
+	t3 = t2 * t
+	mt = 1-t
+	mt2 = mt * mt
+	mt3 = mt2 * mt
+	return Point(p1.x*mt3 + 3*p2.x*mt2*t + 3*p3.x*mt*t2 + p4.x*t3, p1.y*mt3 + 3*p2.y*mt2*t + 3*p3.y*mt*t2 + p4.y*t3)
+	
+def derivative(spline, t):
+	return Point(
+			(3*(spline[1].x-spline[0].x))*(1-t)*(1-t) + (3*(spline[2].x-spline[1].x))*2*(1-t)*t + (3*(spline[3].x-spline[2].x))*t*t,
+			(3*(spline[1].y-spline[0].y))*(1-t)*(1-t) + (3*(spline[2].y-spline[1].y))*2*(1-t)*t + (3*(spline[3].y-spline[2].y))*t*t
+	)
+# Returns a new rotated point
+def rotate(p, a):
+	return Point(int(math.cos(a)*p.x - math.sin(a)*p.y), int(math.sin(a)*p.x + math.cos(a)*p.y))
+# Returns a new translated point	
+def translate(p, dx, dy):
+	return Point(p.x + dx, p.y + dy)
+	
+# Checks if a given line and cubic curve do intersect.
+def intersects(line, spline):
+	assert len(line) == 2 and len(spline) == 4
+			
+	# Now lets find the roots for the x-axis with Newton iterations
+	EPSILON = 0.000000000001
+	roots = []
+	for t in range(1, 50):
+		t /= 50
+		tn = t
+		for i in range(0, 20): # Maximally 20 iterations
+			s = beziersum(spline, tn)
+			d = derivative(spline, tn)
+			
+			if d.x != 0:
+				if s.x <= 0 and s.x > -EPSILON:
+					roots.append(tn)
+					break
+				elif s.x >= 0 and s.x < EPSILON:
+					roots.append(tn)
+					break
+						
+				tn = tn - (s.x / d.x)
+			#print("[i] In round {} with t={} our tn is {} and the function evaluates to {}".format(i, t, tn, s.x))
+	# Round
+	roots = set(roots)
+	print(roots)
+	# Filter the range 0 <= t <= 1
+	roots = [r for r in roots if r >= 0 and r <= 1]
+	
+	# translate such that the first line point becomes the origin
+	#for i, e in enumerate(spline):
+	#	spline[i] = translate(spline[i], -line[-1].x, -line[-1].y)
+	#	
+	# calculate rotation angle
+	#if line[-1] != 0:
+	#	alpha = math.pi/2 - math.atan(line[-1].x/(-line[-1].y))
+	#	
+	#	for i, e in enumerate(spline):
+	#		spline[i] = rotate(spline[i], alpha)
+	#
+	#print("[i] Spline after being translated and rotated: {}".format(spline))
+	
+	
+def lintersects(L1, L2):
+	'Checks whether two line do intersect in their segments'
+	assert len(L1) == 2 and len(L2) == 2
+	
+	m1 = (L1[1].y - L1[0].y) / (L1[1].x - L1[0].x)
+	m2 = (L2[1].y - L2[0].y) / (L2[1].x - L2[0].x)
+	n1 = (L1[1].x*L1[0].y - L1[0].x*L1[1].y) / (L1[1].x - L1[0].x)
+	n2 = (L2[1].x*L2[0].y - L2[0].x*L2[1].y) / (L2[1].x - L2[0].x)
+	
+	# f(x) = m1x + n1 ; g(x) = m2x + n2
+	# Intersection x-component: x = (n2 - n1)/(m1 - m2)
+	
+	if (abs(m1) - abs(m2) == 0): # Lines are parallel; Avoid division by zero
+		return False
+		
+	x = (n2 - n1) / (m1 - m2)
+	
+	# Check whether the found point is on the line segments
+	if ( (x > max(L1[0].x, L1[1].x) or x > max(L2[0].x, L2[1].x)) or # Found x is bigger than a maximal x-coordinate of a at least one line
+	   (x < min(L1[0].x, L1[1].x) or x < min(L2[0].x, L2[1].x)) ):   # Found x is smaller than a minimal x-coordinate of a at least one line
+		return False
+	
+	return Point(int(x), int(m1*x + n1))
 			
 # Some tests when executing module directly.
 if __name__ == '__main__':
 	master = tkinter.Tk()
 	gp = GeometricalPrimitives(master, width=1000, height=1000)
-	gp.bezier([Point(300, 250), Point(0, 0), Point(465, 111)], 'lut')
-	gp.bezier([Point(100, 250), Point(0, 0), Point(365, 211)], 'casteljau')
-	gp.bezier([Point(520, 180), Point(40, 20), Point(165, 311)], 'direct')
-	gp.bezier([Point(30, 800), Point(400, 0), Point(800, 800), Point(800, 83)], 'approx')
+	
+	line1 = [Point(100, 100), Point(600, 800)]
+	line2 = [Point(300,800), Point(500, 0)]
+	ip = lintersects(line1, line2)
+	if ip:
+		print("Found intersection: {}".format(ip))
+		visualize = [Point(ip.x, 900), Point(ip.x, 0)]
+		gp.line(visualize)
+	else:
+		print("No intersections found in the line segments")
+	gp.line(line1)
+	gp.line(line2)
+
+	#spline = [Point(75, 46), Point(35, 200), Point(220, 260), Point(261, 190)]
+	#gp.bezier(spline)
+	#gp.bezier(line)
+	#ip = intersects(line, spline)
+	#gp.line([Point(ip.x, 1000), Point(ip.x, 0)])
+	# gp.bezier([Point(300, 250), Point(0, 0), Point(465, 111)], 'lut')
+	# gp.bezier([Point(100, 250), Point(0, 0), Point(365, 211)], 'casteljau')
+	# gp.bezier([Point(520, 180), Point(40, 20), Point(165, 311)], 'direct')
+	# gp.bezier([Point(30, 800), Point(400, 0), Point(800, 800), Point(800, 83)], 'approx')
 	gp.pack()
 	tkinter.mainloop()

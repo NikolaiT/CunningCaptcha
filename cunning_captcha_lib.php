@@ -9,7 +9,7 @@
  * 
  * @@Version: 0.1
  * @@Author: Nikolai Tschacher
- * @@Date: October 2013
+ * @@Date: October/November 2013
  * @@Contact: incolumitas.com
  */
 
@@ -18,7 +18,7 @@ error_reporting(E_ALL);
 /* ------------------- This is the function you are going to use ------------------- */
 
 /*
- * $path The path to the folder where the resulting captch images are generated.
+ * $path The path to the folder where the resulting captch images are generated. WITH TRAILING SLASH!
  * $number The number of unique captchas to generate.
  * $captchalength The length of the captcha string.
  * 
@@ -38,7 +38,7 @@ function cclib_generateCaptchas($path='', $number=10, $captchalength=5) {
 	/* Generate the captchas */
 	$captcha = CunningCaptcha::get_instance($clength=$captchalength);
 	foreach (range(0, $number) as $i) {
-		$fname = sprintf("%s/%s", $path, substr(sha1(cclib_random_string().$i), 4, 18));
+		$fname = sprintf("%s%s", $path, substr(sha1(cclib_random_string().$i), 4, 18));
 		$captchas[$fname] = $captcha->reload($fname);
 	}
 	return $captchas;
@@ -77,7 +77,8 @@ function cclib_shuffle_assoc(&$array) {
 }
 
 /*
- * Generate a random string. Foundn on stackoverflow.com 
+ * Generate a random string. Foundn on stackoverflow.com
+ * Do not fucking use for crypto related stuff. rand() is not a secure PRNG.
  */
 function cclib_random_string($length=15) {
 	$keys = array_merge(range(0,9), range('a', 'z'));
@@ -88,6 +89,62 @@ function cclib_random_string($length=15) {
 	return $key;
 }
 
+/*
+ * Generates cryptographically secure random numbers within the range
+ *      integer $start : start of the range
+ *      integer $stop : end of the range.
+ * 
+ *      Both parameters need to be positive. If you need a negative random value, just pass positiv values
+ *      to the function and then make the return value negative on your own.
+ * 
+ *      return value: A random integer within the range (including the edges). If the function returns False, something
+ *      went wrong. Always check for false with "===" operator, otherwise a fail might shadow a valid
+ *      random value: zero. You can pass the boolean parameter $secure. If it is true, the random value is 
+ *      cryptographically secure, else it was generated with rand().
+ */
+function cclib_secure_random_number($start, $stop, &$secure="True") {
+	static $calls = 0;
+	
+    if ($start < 0 || $stop < 0 || $stop < $start)
+        return False;
+    
+    /* Just look for a random value within the difference of the range */
+    $range = abs($stop - $start);
+    
+    $format = '';
+    if ($range < 256)
+        $format = 'C';
+    elseif ($range < 65536)
+        $format = 'S';
+    elseif ($range >= 65536 && $range < 4294967296)
+        $format = 'L';
+    
+    /* Get a blob of cryptographically secure random bytes */
+    $binary = openssl_random_pseudo_bytes(8192, $crypto_strong);
+    if ($crypto_strong == False)
+        throw new UnexpectedValueException("openssl_random_bytes has no secure PRNG");
+    
+    /* unpack data into determined format */
+    $data = unpack($format.'*', $binary);
+    if ($data == False)
+        return False;
+    
+    foreach ($data as $value) {
+        $value = intval($value, $base=10);
+        if ($value <= $range) {
+            $secure = True;
+            return ($start + $value);
+	}
+    }
+    
+    $calls++;
+    if ($calls >= 50) { /* Fall back to rand() if the numbers of recursive calls exceed 50 */
+        $secure = False;
+        return rand($start, $stop);
+    } else /* If we could't locate integer in the range, try again as long as we do not try more than 50 times. */
+        return cclib_secure_random_number($start, $stop, $secure);
+}
+ 
 /* 
  * Test the speed of the Bézier plotting functions. 
  */
@@ -140,6 +197,7 @@ abstract class CunningCanvas {
 	
 	const STEP = 0.001;
 	const NUM_SEGMENTS = 15;
+        const DEFAULT_COLOR = 0;
 	
 	protected $width;
 	protected $height;
@@ -177,7 +235,7 @@ abstract class CunningCanvas {
 		return $this->height;
 	}
 	
-	protected final function set_pixel($x, $y, $color=0) {
+	protected final function set_pixel($x, $y, $color=self::DEFAULT_COLOR) {
 		$this->bitmap[$y][$x] = $color;
 	}
 	
@@ -194,11 +252,110 @@ abstract class CunningCanvas {
 				/* Check wheter the glyph fits */
 				if ($i+$dy > $this->height || $j+$dx > $this->width)
 					return False;
-				$this->bitmap[$i+$dy][$j+$dx] = 0;
+				$this->bitmap[$i+$dy][$j+$dx] = self::DEFAULT_COLOR;
 			}
 		}
 	}
 	
+        /**
+         * Classmethod to get the derivative of a second and third degree bezier curve for
+         * the x and y component.
+         * 
+         * @param type $spline
+         * @param type $t
+         * @return array The derivative of the x and y axis of the given spline.
+         * 
+         * linear = (1-t)+t
+         * square = (1-t)**2 + 2(1-t)*t + t**2
+         * cubic = (1-t)**3 + 3*(1-t)**2*t + 3*(1-t)*t**2 + t**3
+         */
+        static final function bezier_derivative($spline, $t) {
+            /* Quadratic curves */
+            if (count($spline == 3)) {
+                return array(
+                        "x_der" => (2*($spline[1]->x-$spline[0]->x))*(1-$t) + (2*($spline[2]->x-$spline[1]->x))*$t,
+                        "y_der" => (2*($spline[1]->y-$spline[0]->y))*(1-$t) + (2*($spline[2]->y-$spline[1]->y))*$t
+                    );
+            } elseif(count($spline) == 4) { /* Cubic curves */
+                return array(
+                        "x_der" => (3*($spline[1]->x-$spline[0]->x))*(1-$t)*(1-$t) + (3*($spline[2]->x-$spline[1]->x))*2*(1-$t)*$t + (3*($spline[3]->x-$spline[2]->x))*$t*$t,
+                        "y_der" => (3*($spline[1]->y-$spline[0]->y))*(1-$t)*(1-$t) + (3*($spline[2]->y-$spline[1]->y))*2*(1-$t)*$t + (3*($spline[3]->y-$spline[2]->y))*$t*$t
+                    );
+            }
+            /* No derivatives of higher degree curves */
+            return False;
+        }
+        /**
+         * Compute the Bezier point for a given t value.
+         * 
+         * @param type $spline
+         * @param type $t
+         * @return array The sum for the x and y component of the given spline.
+         */
+        static final function bezier_sum($spline, $t) {
+            /* Quadratic curves */
+            if (count($spline == 3)) {
+                $t2 = $t*$t;
+                $mt = 1-$t;
+                $mt2 = $mt*$mt;
+                $x = intval($spline[0]->x*$mt2 + $spline[1]->x*2*$mt*$t + $spline[2]->x*$t2);
+                $y = intval($spline[0]->y*$mt2 + $spline[1]->y*2*$mt*$t + $spline[2]->y*$t2);
+                return array("x_sum" => $x, "y_sum" => $y);
+                
+            } elseif(count($spline) == 4) { /* Cubic curves */
+                $t2 = $t*$t;
+                $t3 = $t2 * $t;
+                $mt = 1-$t;
+                $mt2 = $mt * $mt;
+                $mt3 = $mt2 * $mt;
+                $x = intval($spline[0]->x*$mt3 + 3*$spline[1]->x*$mt2*$t + 3*$spline[2]->x*$mt*$t2 + $spline[3]->x*$t3);
+                $y = intval($spline[0]->y*$mt3 + 3*$spline[1]->y*$mt2*$t + 3*$spline[2]->y*$mt*$t2 + $spline[3]->y*$t3);
+                return array("x_sum" => $x, "y_sum" => $y);
+            }
+            /* No computation of higher degree curves */
+            return False;
+        }
+        
+        /**
+         * Find the roots of 3 and 4th degree bezier curve using newton-raphson root finding.
+         * 
+         * @param type $spline
+         */
+        static final function bezier_root($spline, $coord="x") {
+            $APPROX_EPSILON = 0.000001;
+
+            for ($t = 1; $t < 200; $t++) {
+                $t /= 200;
+                $tn = $t;
+                $cnt = 0;
+                while (True) {
+                    if ($cnt > 50)
+                        return $tn;
+                        //throw new Exception ("Newton-Raphson doesn't seem to find anything.");
+                    
+                    $d = self::bezier_derivative($spline, $tn);
+                    $s = self::bezier_sum($spline, $tn);
+                    
+                    if ($d["x_der"] != 0 && $d["y_der"] != 0) {
+                        //echo "In round $cnt, B($tn) = ".$s["x_sum"]."<br />";
+                        /* Check if we are under the threshold */
+                        if ($coord == "x") if (($s["x_sum"] < 0) ? $s["x_sum"] > -$APPROX_EPSILON : $s["x_sum"] < $APPROX_EPSILON) return $tn;
+                        if ($coord == "y") if (($s["y_sum"] < 0) ? $s["y_sum"] > -$APPROX_EPSILON : $s["y_sum"] < $APPROX_EPSILON) return $tn;
+
+                        if ($coord == "x")
+                            $t_n1 = $tn - ($s["x_sum"]/$d["x_der"]);
+                        elseif($coord == "y")
+                            $t_n1 = $tn - ($s["y_sum"]/$d["y_der"]);
+                     
+                        $tn = $t_n1;
+                        //printf("Calculating next round with t=$t and root=$tn <br />");
+                    }
+                    $cnt++;
+                }
+            }
+        }
+        
+        
 	/* 
 	 * All the different rasterization algorithms. They differ in performance and 
 	 * granularity of the resulting splines as well as in the smoothness of the curve.
@@ -207,7 +364,6 @@ abstract class CunningCanvas {
 	/* 
 	 * The next two functions calculate the quadratic and cubic bezier points directly.
 	 */
-	
 	private function _direct_quad_bez($p1, $p2, $p3) {
 		$t = 0;
 		while ($t < 1) {
@@ -449,7 +605,7 @@ class CunningGlyph extends CunningCanvas {
 			$this->load_glyph($character);
 	}
 	
-	public static function get_instance($character='', $width=100, $height=80) {
+	public static function get_instance($character='', $width=50, $height=50) { /* The measures of each glyph should be calculated by the using class */
 		if (!isset(self::$instance)) {
 			self::$instance = new CunningGlyph($character, $width, $height);
 		}
@@ -724,6 +880,8 @@ class CunningGlyph extends CunningCanvas {
 		
 		$this->blur();
 		$this->adjust();
+                
+                $this->_fill();
 		
 		foreach ($this->glyphdata as $shapetype => $shapearray) {
 			switch ($shapetype) {
@@ -775,6 +933,8 @@ class CunningGlyph extends CunningCanvas {
 	
 	/* Maybe I reinvent here something. But don't want to go searching for existing solutions. ;)
 	 * I made it because Python lacks (real) ternary operators and I wanted to play a bit.
+	 * 
+	 * To do: Get min and max value together (Now only one extreme is found per call).
 	 */
 	private function extremas($which="max") {
 		if(!in_array($which, array("max", "min")))
@@ -792,14 +952,119 @@ class CunningGlyph extends CunningCanvas {
 		}
 		return array($exx, $exy);
 	}
-	
-	/* Rudimentary function to fill the glyph (only works when the glyph's shape
-	 * is completly closed and the glyphs border are set to a specific color! The
-	 * point to begin the filling process MUSTS be within the glyphs shape, otherwise
-	 * the whole approach fails!
+        
+	/* 
+	 * Rudimentary function to fill the glyph with a given color.
+         * 
+	 * Approach: Keep in mind that the filling process might happen after
+         * linear transformations have been applied on the glyph. 
+         * 
+         * For each pixel, we need to know if it lies in the glyph or in the outside.
+         * For this point-in-shape detection check, we have this cute idea: http://pomxax.github.io/bezierinfo/#shapes
+         * In short: Ray casting with even-odd rule applied. For every shape
+         * (line or bezier curve), we need to find the intersection points. We will
+         * cast a ray to the upper left corner.
+         * 
+         * The process needs to happen AFTER the glyph is rasterized on the bitmap, because
+         * reshaping the geometrical primitives after filling a shape is impossible to say the least.
 	 */
-	private function _fill($startp) {}
-	 
+	private function _fill() {
+            if ($this->plotted)
+                return False;
+            
+            $upper_left = new CunningPoint(0, 0);
+            
+            for ($i = 0; $i < $this->get_height(); $i++) {
+                for ($j = 0; $j < $this->get_width(); $j++) {
+                    $current_point = new CunningPoint($j, $i);
+                    foreach ($this->glyphdata as $shapetype) {
+                        foreach ($shapetype as $shape) {
+                            if ($this->_intersects(array(new CunningPoint(0, 0), $current_point), $shape)) {
+                                $this->set_pixel ($j, $i);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        /* 
+         * Check whether there's a intersection between the 
+         * given $line and $spline. The $spline may be a quadratic
+         * or cubic Bezier curvature, as well as a line.
+         * 
+         * Approach: http://pomax.github.io/bezierinfo/#intersections
+         * Using Raphson-Netwon root finding to find the extremities.
+         * 
+         * Returns True if a intersection was found.
+         */
+        private function _intersects($line, $shape) {
+            if (count($shape) == 2) /* Handle line-line intersections */ {
+                $a1 = $line[0]->y - $line[1]->x; $a2 = $shape[0]->y - $shape[1]->x;
+                $b1 = $line[0]->x - $line[1]->x; $b2 = $shape[0]->x - $shape[1]->x;
+                $c1 = $a1*$line[0]->x+$b1*$line[0]->y; $c2 = $a2*$shape[0]->x+$b2*$shape[1]->y;
+                $det = $a1*$b2 - $a2*$b1;
+                
+                if ($det == 0) {
+                    //Lines are parallel
+                    return False;
+                } else {
+                    $x = (int) (($b2*$c1 - $b1*$c2)/$det);
+                    $y = (int) (($a1*$c2 - $a2*$c1)/$det);
+                    echo "Found intersection of line [({$line[0]->x}, {$line[0]->y}), ({$line[1]->x}, {$line[1]->y})] and line [({$shape[0]->x}, {$shape[0]->y}), ({$shape[1]->x}, {$shape[1]->y})]: ($x, $y) <br />";
+                }
+                
+                if (
+                        min($line[0]->x,$line[1]->x) <= $x && $x <= max($line[0]->x,$line[1]->x) &&
+                        min($line[0]->y,$line[1]->y) <= $y && $y <= max($line[0]->y,$line[1]->y)
+                   ) {
+                        echo "True";
+                        return True;
+                   } else return False;
+            }
+            
+            if (count($shape) == 4) { /* Handle cubic splines */
+                /* Translate/rotate $line in that way such that it becomes (a subset) of the x-axis */
+
+                /* Translate such that the first point of the line coincides with the origin */
+                foreach ($shape as $key => $value) {
+                    $shape[$key]->x = $shape[$key]->x - $line[0]->x;
+                    $shape[$key]->y = $shape[$key]->y - $line[0]->y;
+                }
+
+                /* 
+                 * Rotate such that the y coordinate of the last line point becomes zero. Find out the angle
+                 * such that the following is true for the last point in the spline:
+                 *  y' = xsin(a) + ycos(a) = 0 <=> xsin(a) = -ycos(a) <=> x/-y =cos(a)/sin(a)
+                 *  <=> x/-y = cot(a) <=> a = arccot(x/-y)
+                 * whereas alpha denotes the rotation angle.
+                 */
+                $i = count($line)-1;
+                if ($line[$i]->y != 0) {
+                    $alpha = pi()/2 - atan($line[$i]->x/(-$line[$i]->y));
+                    //echo "Alpha is $alpha <br />";
+
+                    /* And now rotate with this angle */
+                    foreach ($shape as $key => $value) {
+                        $rx = intval(cos($alpha)*$shape[$key]->x - sin($alpha)*$shape[$key]->y);
+                        $ry = intval(sin($alpha)*$shape[$key]->x + cos($alpha)*$shape[$key]->y);
+                        $shape[$key]->x = $rx;
+                        $shape[$key]->y = $ry;
+                    }
+                }
+
+                //echo "<pre>"; var_dump($spline); echo "</pre>";
+
+                /* Now the roots of the translated/rotated spline coincides with the intersections points with the line. */
+                $in_range = create_function('$num', 'if ($num <= 1 && $num >= 0) return True; else return False;');
+                $root_x = CunningCanvas::bezier_root($shape, $coord="x");
+                $root_y = CunningCanvas::bezier_root($shape, $coord="y");
+                if ($in_range($root_x) || $in_range($root_y))
+                    return True;
+                else
+                    return False;
+            }
+        }
 	
 	/*
 	 * http://mathworld.wolfram.com/AffineTransformation.html
@@ -857,13 +1122,13 @@ class CunningGlyph extends CunningCanvas {
 	 * this method essentially determines the strenth of the captcha.
 	 */
 	private function blur() {
-		$shear = rand(-6, 6)/10;
+		$shear = (cclib_secure_random_number(0, 13)-6)/10;
 		$this->_shear($shear, $shear);
 		
 		//$skew = rand(0, 90);
 		//$this->_skew($skew);
 		
-		$this->_rotate(rand(-5, 4)/10);
+		$this->_rotate((cclib_secure_random_number(0, 10)-5)/10);
 		
 		//$scale = rand(5, 30) / 10;
 		//$this->_scale($scale, $scale);
@@ -906,7 +1171,8 @@ class CunningCaptcha extends CunningCanvas {
 	private $outfile;
 	
 	public function __construct($clength, $height) {
-		/* This check needs to be here in order to hold the constructor public (inheritance).
+		/* 
+                 * This check needs to be here in order to hold the constructor public (inheritance).
 		 * while keeping Singleton design pattern.
 		 */
 		if(isset(self::$instance))
@@ -915,7 +1181,7 @@ class CunningCaptcha extends CunningCanvas {
 		/* Get a glyph instance */
 		$this->stamp = CunningGlyph::get_instance($character='');
 		
-		parent::__construct($this->stamp->get_width()*$clength, $height);
+		parent::__construct($this->stamp->get_width()*$clength + 100 /* Some buffer */, $height);
 		$this->clength = $clength;
 	}
 	
@@ -926,7 +1192,7 @@ class CunningCaptcha extends CunningCanvas {
 	 * 
 	 * Make sure that you take care of your instance ;)
 	 */
-	public static function get_instance($clength=5, $height=150) {
+	public static function get_instance($clength=5, $height=80) {
 		if (!isset(self::$instance)) {
 			$c = __CLASS__;
 			self::$instance = new $c($clength, $height);
@@ -938,20 +1204,20 @@ class CunningCaptcha extends CunningCanvas {
 	/* 
 	 * Implement abstract draw() function.
 	 * This function merges a random selection of glyphs into the bitmap and
-	 * returns the according string
-     */
+	 * returns the corresponding string.
+         */
 	protected function draw() {
 		/* Take n=length random characters from the alphabet */
 		$randalphabet = explode(', ', self::ALPHABET);
 		shuffle($randalphabet);
 		for ($i = 0; $i < $this->clength; $i++) {
-			$randchars[] = $randalphabet[intval(rand(0, count($randalphabet)-1))];
+			$randchars[] = $randalphabet[intval(cclib_secure_random_number(0, count($randalphabet)-1))];
 		}
 
 		foreach ($randchars as $i => $char) {
 			$this->stamp->load_glyph($char);
 			$this->stamp->draw();
-			$this->merge(rand(0, 50), $i*rand(70, 80), $this->stamp->get_bitmap());
+			$this->merge(cclib_secure_random_number(0, 20), $i*cclib_secure_random_number($this->stamp->get_width(), $this->stamp->get_width() + 10), $this->stamp->get_bitmap());
 		}
 		
 		//echo sprintf("[!] Using %u bytes <br />", memory_get_usage());
@@ -960,43 +1226,6 @@ class CunningCaptcha extends CunningCanvas {
 		
 		/* Return the captcha word as a string */
 		return implode('', $randchars);
-	}
-	
-	public function tests() {
-		/* Tests. */
-		$testcase = 'test-2';
-		switch ($testcase) {
-			case 'test-1':
-				$c = new CunningCanvas();
-				$c->spline(array(new CunningPoint(10, 20), new CunningPoint(65, 70), new CunningPoint(40, 100)), $algo='lut');
-				$c->spline(array(new CunningPoint(30, 25), new CunningPoint(0,0), new CunningPoint(46, 11)), $algo='casteljau');
-				$c->spline(array(new CunningPoint(52, 18), new CunningPoint(40, 20), new CunningPoint(16, 31), new CunningPoint(100, 0)), $algo='direct');
-				$c->spline(array(new CunningPoint(30, 80), new CunningPoint(40, 0), new CunningPoint(80, 80), new CunningPoint(80, 83)), $algo='approx');
-				$this->copy_glyph(0, 0, $c->get_bitmap());
-				$this->write_image('out', $format='ppm');
-				break;
-			case 'test-2':
-				$g = new CunningGlyph('W');
-				$g->draw();
-				$this->merge(20, 0, $g->get_bitmap());
-				
-				$gg = new CunningGlyph('H');
-				$gg->draw();
-				$this->merge(20, 100, $gg->get_bitmap());
-				
-				$ggg = new CunningGlyph('a');
-				$ggg->draw();
-				$this->merge(20, 200, $ggg->get_bitmap());
-				
-				$gggg = new CunningGlyph('S');
-				$gggg->draw();
-				$this->merge(20, 300, $gggg->get_bitmap());
-				
-				$this->write_image('glyph', $format='ppm');
-				break;
-			default:
-				break;
-		}
 	}
 	
 	public function write_image($path, $format = 'png') {
@@ -1014,8 +1243,7 @@ class CunningCaptcha extends CunningCanvas {
 				break;
 			case 'ppm':
 				/* Writes a colorous ppm image file. It's not compressed */
-				fwrite($h, sprintf("P3\n%u %u\n255\n", $this->width, $this->height))
-															or exit('fwrite() failed.');
+				fwrite($h, sprintf("P3\n%u %u\n255\n", $this->width, $this->height)) or exit('fwrite() failed.');
 				$bm = $this->get_bitmap();
 				/* Write all pixels */
 				for ($i = 0; $i < $this->height; $i++) {
@@ -1023,7 +1251,7 @@ class CunningCaptcha extends CunningCanvas {
 						if (isset($bm[$i][$j]))
 							fwrite($h, '0 0 0'."\t");
 						else
-							fwrite($h, '255 255 255'."\t");
+							fwrite($h, '200 200 200'."\t");
 					}
 					fwrite($h,"\n");
 				}

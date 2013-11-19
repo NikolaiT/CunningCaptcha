@@ -1,0 +1,52 @@
+<h1>Introduction</h1>
+
+This blog post finishes my journey abroad into the depths of computer graphics with the presentation of my brand new wordpress plugin named CunningCaptcha. Here I am going to talk about the capabilities of my plugin as well as it's limitations.
+
+As you can read in my previos two blog posts,
+<ul>
+	<li> <a href=""></a>
+	<li> <a href=""></a>
+</ul>
+
+...the programming of the wordpress plugin was preceded by a exhaustive investigation of geometrical primitives such as Bézier curvatures and optimizing of rasterization algorithms. This knowlege then gave me the ability to plot my own Glyphs and thus, obtain and design a own font which in turn was the foundation for the captcha.
+
+<h2>The plugin</h2>
+
+Let's first dig deeper into the functionalties of the plugin itself. The plugin directory within the wp-content/plugins/cunning_captcha/ contains a folder named captchas. My plugin feeds every now and then (in intervals of 2 hours to be precise) freshly generated captcha-images to this folder. When the folder has more than 500 pictures, it replaces the oldest ones with the newly generated captchas. With this I make sure that the pool regenerates itself steadily. I control this process with the help of cronjobs. There are two layers of cronjobs. One pseudo cronjob, which is included in my plugin and is called by wordpress itself and the other real cronjob, that serves as fallback in the case nobody visits the site (And thus my plugin won't be called which means no captchas are generated). The real cronjob does nothing else than just download the plugin file via wget in specific intervals.
+
+But why the above strategy? Why do I not just generate captchas on demand, when someone visits the site?
+
+In short: Performance. 
+
+My captcha calculates randomly placed splines and glyphs on a bitmap and saves the rather large (no compression) anymap on disk. All this requires pretty much memory and CPU power, since the algorithms to rasterize lines and Bézier splines are rather expensive. Therefore I just fire the captcha factory only every 2 hours (Or another chosen interval). All users that visit the plugin get a randomly chosen captcha served. But this approachs exhibits a big drawback: The captcha exists to prevent spammers from posting comments. But due to this design, every malicious user could just request a large amount of captchas until he obtained the majority of captchas in the pool. Then he could manually map the 500 obtained pictures to it's string and teach his script the knowlege and BOOM the captcha is bypassed. Of course he would need to update the mappings every two hours, but this wouldn't hinder a motivated attacker to do so.
+
+How can we prevent this?
+
+One idea would be to assign to every unique IP address (user) a specific subset of the pool of all captchas. If he requests more captchas than the size of his assigned pool, he's denied from all further activities that require captchas interaction (commenting, login) for, let's say, the next 20 minutes.
+
+But a big drawback to this solution is its complexity and slowness, when lots of users are visiting the site (You may be inclined to mention that my site will never be that big, but not so fast my dear ;)). Let's say my blog had 100 unique visitors a second (through a lovely hug of reddit for instance), then wordpress would need to make 100 database accesses through get_option() or some equivalent function in order to get the assigned captcha for the requesting IP address. Maybe wordpress caches such data and it wouldn't be that bad performance wise, but I still don't like the solution of maintaing state information of every user for 20 minutes (I didn't even mention performance heavy delete's and writes in the database when a new IP is found or an observation interval ends).
+
+So let's think of another way. How can I make sure that a user cannot download all captchas with a high probability? 
+
+Maybe I can't avoid it. But I can make it unprobable. Actually I really think that there is no other way than to keep some stateful information. But I have to approach the problem from the another side. Let's think from the viewpoint of the spammer.
+
+The spammer has complete knowledge of the application. He knows that he can download all the captchas when he just reloads the page long enough. How can we detect such brute force approaches? Another idea would be to read the last 1000 lines of access_log every 5 minutes and parse the ip addresses. If one single IP address emerges more than a threshold, we'll block this IP address from further activities. But this can easily be circumvented with proxies. And it might also be weak against fast and slow attacks. What if a user can download all captchas within the 5 minutes (To make the interval less than 5 minutes is too slow)? What if he spreads his download activity over a period of 1 hour such that his requests are not suspicious anymore? You get the picture: A clever spammer coold easily bypass this protection scheme. 
+
+For now I haven't found a solution to my satisfaction. I will seek for help on r/netsec and stack security and ask what kind of remedy exists.
+
+Well let's go back to the plugins functionality.
+
+Now my captcha plugin does nothing else than just chose a random picture of my pool (Note that the pool has unpredictable filenames) and maps this picture to a session variable. Upon login or sending comments (realized with wordpress hooks), I check wheter the user has entered the correct captcha string. If yes, his comment/login process is handled, if not, it's rejected. That's it.
+
+
+<h2>Why another captcha implementation? Do you like to reinvent the wheel?</h2>
+
+Just for the sake of learning a bit more PHP and some computer graphics algorithms. Really. There are lot's of better solutions out there (List of examples) but some are worse.
+
+<h2>Excursus - Why is captcha bad?</h2>
+
+It is bad. Believe me. It does not much more than yielding simple math riddles. They can easily parsed by simple programs. It cost me 20 minutes to come up with a little crack that bypasses the captcha entirely. It really astonishes me that this plugin is already this old and had had lot's of changes and improvements and the code is also really nice, but the entire captcha logic is completely rubbish. It has one million downloads and even I do use it! Why, well because for science (How else could write about it) and because I am too lazy to luck for something better.
+
+
+
+
