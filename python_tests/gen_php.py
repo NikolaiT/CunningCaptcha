@@ -29,7 +29,7 @@ def write_switch_case(fname, fd):
 		fd.write('\t\t\t\'{0}\' => array(\n'.format(k))
 		for i, shape in enumerate(v):
 			fmt = ['array({0}), ', 'array({0})'][i == len(v)-1] # Last array elements don't have commas
-			data.append(fmt.format(', '.join(['new Point(%d, %d)' % p for p in shape])))
+			data.append(fmt.format(', '.join(['new CunningPoint(%d, %d)' % p for p in shape])))
 		for i in range(0, len(data), 3):
 			fd.write('\t\t\t\t{0}\n'.format(''.join(data[i:i+4])))
 			end = ['\t\t\t),\n', '\t\t\t)\n'][j == len(d)]

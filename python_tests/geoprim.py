@@ -258,8 +258,11 @@ def intersects(line, spline):
 	
 	
 def lintersects(L1, L2):
-	'Checks whether two line do intersect in their segments'
-	assert len(L1) == 2 and len(L2) == 2
+	'''Checks whether two lines intersect in their segments. Returns
+	   the intersection points if it exists, else returns False.
+	'''
+	assert len(L1) == 2 and len(L2) == 2 # Lines
+	assert L1[1].x - L1[0].x != 0 and L2[1].x - L2[0].x != 0 # We don't want to deal with lines parallel to the y-axis (dx=0)
 	
 	m1 = (L1[1].y - L1[0].y) / (L1[1].x - L1[0].x)
 	m2 = (L2[1].y - L2[0].y) / (L2[1].x - L2[0].x)
@@ -286,7 +289,7 @@ if __name__ == '__main__':
 	master = tkinter.Tk()
 	gp = GeometricalPrimitives(master, width=1000, height=1000)
 	
-	line1 = [Point(100, 100), Point(600, 800)]
+	line1 = [Point(1000, 100), Point(149, 800)]
 	line2 = [Point(300,800), Point(500, 0)]
 	ip = lintersects(line1, line2)
 	if ip:
