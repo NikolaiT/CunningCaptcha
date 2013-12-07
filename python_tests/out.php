@@ -1,229 +1,243 @@
-switch ($c) {
-	case '':
-		$this->glyphdata = array(
+$alphabet = array(
+	'y' => array(
+		'width' => 347,
+		'height' => 381,
+		'glyph_data' => array(
 			'cubic_splines' => array(
-				array(new CunningPoint(260, 601), new CunningPoint(260, 601), new CunningPoint(230, 670), new CunningPoint(204, 695)), array(new CunningPoint(204, 695), new CunningPoint(191, 706), new CunningPoint(175, 717), new CunningPoint(158, 719)), array(new CunningPoint(158, 719), new CunningPoint(135, 722), new CunningPoint(88, 698), new CunningPoint(88, 698)), array(new CunningPoint(82, 715), new CunningPoint(82, 715), new CunningPoint(131, 737), new CunningPoint(155, 735)), 
-				array(new CunningPoint(82, 715), new CunningPoint(82, 715), new CunningPoint(131, 737), new CunningPoint(155, 735)), array(new CunningPoint(155, 735), new CunningPoint(175, 733), new CunningPoint(194, 721), new CunningPoint(210, 708)), array(new CunningPoint(210, 708), new CunningPoint(240, 681), new CunningPoint(257, 642), new CunningPoint(277, 606)), array(new CunningPoint(277, 606), new CunningPoint(317, 534), new CunningPoint(378, 372), new CunningPoint(378, 372))
-				array(new CunningPoint(277, 606), new CunningPoint(317, 534), new CunningPoint(378, 372), new CunningPoint(378, 372))
+				array(new Point(178, 245), new Point(178, 245), new Point(148, 314), new Point(122, 339)), array(new Point(122, 339), new Point(109, 350), new Point(93, 361), new Point(76, 363)), array(new Point(76, 363), new Point(53, 366), new Point(6, 342), new Point(6, 342)), array(new Point(0, 359), new Point(0, 359), new Point(49, 381), new Point(73, 379)), 
+				array(new Point(0, 359), new Point(0, 359), new Point(49, 381), new Point(73, 379)), array(new Point(73, 379), new Point(93, 377), new Point(112, 365), new Point(128, 352)), array(new Point(128, 352), new Point(158, 325), new Point(175, 286), new Point(195, 250)), array(new Point(195, 250), new Point(235, 178), new Point(296, 16), new Point(296, 16))
+				array(new Point(195, 250), new Point(235, 178), new Point(296, 16), new Point(296, 16))
 			),
 			'lines' => array(
-				array(new CunningPoint(112, 375), new CunningPoint(147, 375)), array(new CunningPoint(147, 375), new CunningPoint(260, 601)), array(new CunningPoint(88, 698), new CunningPoint(82, 715)), array(new CunningPoint(378, 372), new CunningPoint(429, 372)), 
-				array(new CunningPoint(378, 372), new CunningPoint(429, 372)), array(new CunningPoint(429, 372), new CunningPoint(429, 356)), array(new CunningPoint(429, 356), new CunningPoint(321, 356)), array(new CunningPoint(321, 356), new CunningPoint(321, 372)), 
-				array(new CunningPoint(321, 356), new CunningPoint(321, 372)), array(new CunningPoint(321, 372), new CunningPoint(360, 372)), array(new CunningPoint(360, 372), new CunningPoint(271, 585)), array(new CunningPoint(271, 585), new CunningPoint(163, 375)), 
-				array(new CunningPoint(271, 585), new CunningPoint(163, 375)), array(new CunningPoint(163, 375), new CunningPoint(217, 374)), array(new CunningPoint(217, 374), new CunningPoint(217, 356)), array(new CunningPoint(217, 356), new CunningPoint(112, 356)), 
-				array(new CunningPoint(217, 356), new CunningPoint(112, 356)), array(new CunningPoint(112, 356), new CunningPoint(112, 375))
-			)
-		);
-		break;
-	case 'W':
-		$this->glyphdata = array(
+				array(new Point(30, 19), new Point(65, 19)), array(new Point(65, 19), new Point(178, 245)), array(new Point(6, 342), new Point(0, 359)), array(new Point(296, 16), new Point(347, 16)), 
+				array(new Point(296, 16), new Point(347, 16)), array(new Point(347, 16), new Point(347, 0)), array(new Point(347, 0), new Point(239, 0)), array(new Point(239, 0), new Point(239, 16)), 
+				array(new Point(239, 0), new Point(239, 16)), array(new Point(239, 16), new Point(278, 16)), array(new Point(278, 16), new Point(189, 229)), array(new Point(189, 229), new Point(81, 19)), 
+				array(new Point(189, 229), new Point(81, 19)), array(new Point(81, 19), new Point(135, 18)), array(new Point(135, 18), new Point(135, 0)), array(new Point(135, 0), new Point(30, 0)), 
+				array(new Point(135, 0), new Point(30, 0)), array(new Point(30, 0), new Point(30, 19))
+		))
+	),
+	'W' => array(
+		'width' => 520,
+		'height' => 390,
+		'glyph_data' => array(
 			'lines' => array(
-				array(new CunningPoint(70, 322), new CunningPoint(200, 712)), array(new CunningPoint(200, 712), new CunningPoint(260, 712)), array(new CunningPoint(260, 712), new CunningPoint(340, 442)), array(new CunningPoint(340, 442), new CunningPoint(420, 712)), 
-				array(new CunningPoint(340, 442), new CunningPoint(420, 712)), array(new CunningPoint(420, 712), new CunningPoint(480, 712)), array(new CunningPoint(480, 712), new CunningPoint(590, 322)), array(new CunningPoint(590, 322), new CunningPoint(500, 332)), 
-				array(new CunningPoint(590, 322), new CunningPoint(500, 332)), array(new CunningPoint(500, 332), new CunningPoint(450, 612)), array(new CunningPoint(450, 612), new CunningPoint(370, 402)), array(new CunningPoint(370, 402), new CunningPoint(310, 402)), 
-				array(new CunningPoint(370, 402), new CunningPoint(310, 402)), array(new CunningPoint(310, 402), new CunningPoint(230, 612)), array(new CunningPoint(230, 612), new CunningPoint(160, 332)), array(new CunningPoint(160, 332), new CunningPoint(70, 322))
-				array(new CunningPoint(160, 332), new CunningPoint(70, 322))
-			)
-		);
-		break;
-	case 'G':
-		$this->glyphdata = array(
+				array(new Point(0, 0), new Point(130, 390)), array(new Point(130, 390), new Point(190, 390)), array(new Point(190, 390), new Point(270, 120)), array(new Point(270, 120), new Point(350, 390)), 
+				array(new Point(270, 120), new Point(350, 390)), array(new Point(350, 390), new Point(410, 390)), array(new Point(410, 390), new Point(520, 0)), array(new Point(520, 0), new Point(430, 10)), 
+				array(new Point(520, 0), new Point(430, 10)), array(new Point(430, 10), new Point(380, 290)), array(new Point(380, 290), new Point(300, 80)), array(new Point(300, 80), new Point(240, 80)), 
+				array(new Point(300, 80), new Point(240, 80)), array(new Point(240, 80), new Point(160, 290)), array(new Point(160, 290), new Point(90, 10)), array(new Point(90, 10), new Point(0, 0))
+				array(new Point(90, 10), new Point(0, 0))
+		))
+	),
+	'G' => array(
+		'width' => 248,
+		'height' => 353,
+		'glyph_data' => array(
 			'cubic_splines' => array(
-				array(new CunningPoint(516, 306), new CunningPoint(516, 306), new CunningPoint(479, 274), new CunningPoint(457, 263)), array(new CunningPoint(457, 263), new CunningPoint(437, 253), new CunningPoint(414, 246), new CunningPoint(392, 250)), array(new CunningPoint(392, 250), new CunningPoint(366, 254), new CunningPoint(342, 271), new CunningPoint(324, 291)), array(new CunningPoint(324, 291), new CunningPoint(301, 316), new CunningPoint(288, 349), new CunningPoint(280, 381)), 
-				array(new CunningPoint(324, 291), new CunningPoint(301, 316), new CunningPoint(288, 349), new CunningPoint(280, 381)), array(new CunningPoint(280, 381), new CunningPoint(271, 421), new CunningPoint(268, 464), new CunningPoint(280, 503)), array(new CunningPoint(280, 503), new CunningPoint(289, 533), new CunningPoint(307, 561), new CunningPoint(332, 579)), array(new CunningPoint(332, 579), new CunningPoint(351, 593), new CunningPoint(376, 598), new CunningPoint(400, 598)), 
-				array(new CunningPoint(332, 579), new CunningPoint(351, 593), new CunningPoint(376, 598), new CunningPoint(400, 598)), array(new CunningPoint(400, 598), new CunningPoint(435, 599), new CunningPoint(504, 590), new CunningPoint(504, 590)), array(new CunningPoint(475, 543), new CunningPoint(476, 572), new CunningPoint(449, 570), new CunningPoint(426, 567)), array(new CunningPoint(426, 567), new CunningPoint(398, 563), new CunningPoint(342, 547), new CunningPoint(326, 524)), 
-				array(new CunningPoint(426, 567), new CunningPoint(398, 563), new CunningPoint(342, 547), new CunningPoint(326, 524)), array(new CunningPoint(326, 524), new CunningPoint(306, 494), new CunningPoint(307, 454), new CunningPoint(311, 420)), array(new CunningPoint(311, 420), new CunningPoint(314, 382), new CunningPoint(324, 341), new CunningPoint(348, 311)), array(new CunningPoint(348, 311), new CunningPoint(364, 293), new CunningPoint(387, 280), new CunningPoint(412, 282)), 
-				array(new CunningPoint(348, 311), new CunningPoint(364, 293), new CunningPoint(387, 280), new CunningPoint(412, 282)), array(new CunningPoint(412, 282), new CunningPoint(445, 284), new CunningPoint(492, 330), new CunningPoint(492, 330)), array(new CunningPoint(492, 330), new CunningPoint(492, 330), new CunningPoint(486, 338), new CunningPoint(516, 306))
+				array(new Point(248, 60), new Point(248, 60), new Point(211, 28), new Point(189, 17)), array(new Point(189, 17), new Point(169, 7), new Point(146, 0), new Point(124, 4)), array(new Point(124, 4), new Point(98, 8), new Point(74, 25), new Point(56, 45)), array(new Point(56, 45), new Point(33, 70), new Point(20, 103), new Point(12, 135)), 
+				array(new Point(56, 45), new Point(33, 70), new Point(20, 103), new Point(12, 135)), array(new Point(12, 135), new Point(3, 175), new Point(0, 218), new Point(12, 257)), array(new Point(12, 257), new Point(21, 287), new Point(39, 315), new Point(64, 333)), array(new Point(64, 333), new Point(83, 347), new Point(108, 352), new Point(132, 352)), 
+				array(new Point(64, 333), new Point(83, 347), new Point(108, 352), new Point(132, 352)), array(new Point(132, 352), new Point(167, 353), new Point(236, 344), new Point(236, 344)), array(new Point(207, 297), new Point(208, 326), new Point(181, 324), new Point(158, 321)), array(new Point(158, 321), new Point(130, 317), new Point(74, 301), new Point(58, 278)), 
+				array(new Point(158, 321), new Point(130, 317), new Point(74, 301), new Point(58, 278)), array(new Point(58, 278), new Point(38, 248), new Point(39, 208), new Point(43, 174)), array(new Point(43, 174), new Point(46, 136), new Point(56, 95), new Point(80, 65)), array(new Point(80, 65), new Point(96, 47), new Point(119, 34), new Point(144, 36)), 
+				array(new Point(80, 65), new Point(96, 47), new Point(119, 34), new Point(144, 36)), array(new Point(144, 36), new Point(177, 38), new Point(224, 84), new Point(224, 84)), array(new Point(224, 84), new Point(224, 84), new Point(218, 92), new Point(248, 60))
 			),
 			'lines' => array(
-				array(new CunningPoint(504, 590), new CunningPoint(506, 448)), array(new CunningPoint(506, 448), new CunningPoint(386, 446)), array(new CunningPoint(386, 446), new CunningPoint(384, 477)), array(new CunningPoint(384, 477), new CunningPoint(475, 477)), 
-				array(new CunningPoint(384, 477), new CunningPoint(475, 477)), array(new CunningPoint(475, 477), new CunningPoint(475, 543)), array(new CunningPoint(516, 306), new CunningPoint(516, 306))
-			)
-		);
-		break;
-	case 'e':
-		$this->glyphdata = array(
+				array(new Point(236, 344), new Point(238, 202)), array(new Point(238, 202), new Point(118, 200)), array(new Point(118, 200), new Point(116, 231)), array(new Point(116, 231), new Point(207, 231)), 
+				array(new Point(116, 231), new Point(207, 231)), array(new Point(207, 231), new Point(207, 297)), array(new Point(248, 60), new Point(248, 60))
+		))
+	),
+	'e' => array(
+		'width' => 480,
+		'height' => 615,
+		'glyph_data' => array(
 			'cubic_splines' => array(
-				array(new CunningPoint(148, 443), new CunningPoint(102, 567), new CunningPoint(105, 761), new CunningPoint(306, 806)), array(new CunningPoint(306, 806), new CunningPoint(506, 851), new CunningPoint(556, 659), new CunningPoint(562, 642)), array(new CunningPoint(491, 642), new CunningPoint(491, 642), new CunningPoint(456, 734), new CunningPoint(415, 751)), array(new CunningPoint(415, 751), new CunningPoint(354, 775), new CunningPoint(268, 758), new CunningPoint(223, 710)), 
-				array(new CunningPoint(415, 751), new CunningPoint(354, 775), new CunningPoint(268, 758), new CunningPoint(223, 710)), array(new CunningPoint(223, 710), new CunningPoint(184, 669), new CunningPoint(200, 542), new CunningPoint(200, 542)), array(new CunningPoint(563, 540), new CunningPoint(563, 540), new CunningPoint(582, 376), new CunningPoint(436, 306)), array(new CunningPoint(436, 306), new CunningPoint(290, 236), new CunningPoint(185, 344), new CunningPoint(148, 443)), 
-				array(new CunningPoint(436, 306), new CunningPoint(290, 236), new CunningPoint(185, 344), new CunningPoint(148, 443)), array(new CunningPoint(489, 493), new CunningPoint(489, 493), new CunningPoint(481, 350), new CunningPoint(353, 348)), array(new CunningPoint(353, 348), new CunningPoint(225, 345), new CunningPoint(199, 493), new CunningPoint(199, 493))
+				array(new Point(46, 207), new Point(0, 331), new Point(3, 525), new Point(204, 570)), array(new Point(204, 570), new Point(404, 615), new Point(454, 423), new Point(460, 406)), array(new Point(389, 406), new Point(389, 406), new Point(354, 498), new Point(313, 515)), array(new Point(313, 515), new Point(252, 539), new Point(166, 522), new Point(121, 474)), 
+				array(new Point(313, 515), new Point(252, 539), new Point(166, 522), new Point(121, 474)), array(new Point(121, 474), new Point(82, 433), new Point(98, 306), new Point(98, 306)), array(new Point(461, 304), new Point(461, 304), new Point(480, 140), new Point(334, 70)), array(new Point(334, 70), new Point(188, 0), new Point(83, 108), new Point(46, 207)), 
+				array(new Point(334, 70), new Point(188, 0), new Point(83, 108), new Point(46, 207)), array(new Point(387, 257), new Point(387, 257), new Point(379, 114), new Point(251, 112)), array(new Point(251, 112), new Point(123, 109), new Point(97, 257), new Point(97, 257))
 			),
 			'lines' => array(
-				array(new CunningPoint(562, 642), new CunningPoint(491, 642)), array(new CunningPoint(200, 542), new CunningPoint(563, 540)), array(new CunningPoint(148, 443), new CunningPoint(148, 443)), array(new CunningPoint(199, 493), new CunningPoint(489, 493)), 
-				array(new CunningPoint(199, 493), new CunningPoint(489, 493)), array(new CunningPoint(199, 493), new CunningPoint(199, 493))
-			)
-		);
-		break;
-	case 'a':
-		$this->glyphdata = array(
+				array(new Point(460, 406), new Point(389, 406)), array(new Point(98, 306), new Point(461, 304)), array(new Point(46, 207), new Point(46, 207)), array(new Point(97, 257), new Point(387, 257)), 
+				array(new Point(97, 257), new Point(387, 257)), array(new Point(97, 257), new Point(97, 257))
+		))
+	),
+	'a' => array(
+		'width' => 351,
+		'height' => 634,
+		'glyph_data' => array(
 			'cubic_splines' => array(
-				array(new CunningPoint(315, 20), new CunningPoint(283, 20), new CunningPoint(253, 29), new CunningPoint(227, 47)), array(new CunningPoint(227, 47), new CunningPoint(191, 73), new CunningPoint(180, 182), new CunningPoint(180, 182)), array(new CunningPoint(180, 182), new CunningPoint(193, 197), new CunningPoint(215, 232), new CunningPoint(215, 232)), array(new CunningPoint(215, 232), new CunningPoint(215, 232), new CunningPoint(224, 119), new CunningPoint(249, 92)), 
-				array(new CunningPoint(215, 232), new CunningPoint(215, 232), new CunningPoint(224, 119), new CunningPoint(249, 92)), array(new CunningPoint(249, 92), new CunningPoint(281, 51), new CunningPoint(327, 46), new CunningPoint(382, 94)), array(new CunningPoint(382, 94), new CunningPoint(420, 150), new CunningPoint(397, 205), new CunningPoint(365, 248)), array(new CunningPoint(365, 248), new CunningPoint(329, 297), new CunningPoint(271, 294), new CunningPoint(225, 307)), 
-				array(new CunningPoint(365, 248), new CunningPoint(329, 297), new CunningPoint(271, 294), new CunningPoint(225, 307)), array(new CunningPoint(225, 307), new CunningPoint(129, 346), new CunningPoint(120, 464), new CunningPoint(143, 541)), array(new CunningPoint(143, 541), new CunningPoint(152, 582), new CunningPoint(173, 610), new CunningPoint(210, 621)), array(new CunningPoint(210, 621), new CunningPoint(270, 638), new CunningPoint(313, 621), new CunningPoint(345, 583)), 
-				array(new CunningPoint(210, 621), new CunningPoint(270, 638), new CunningPoint(313, 621), new CunningPoint(345, 583)), array(new CunningPoint(345, 583), new CunningPoint(351, 610), new CunningPoint(352, 640), new CunningPoint(378, 646)), array(new CunningPoint(378, 646), new CunningPoint(418, 654), new CunningPoint(471, 648), new CunningPoint(432, 609)), array(new CunningPoint(432, 609), new CunningPoint(393, 571), new CunningPoint(403, 555), new CunningPoint(401, 530)), 
-				array(new CunningPoint(432, 609), new CunningPoint(393, 571), new CunningPoint(403, 555), new CunningPoint(401, 530)), array(new CunningPoint(455, 91), new CunningPoint(459, 63), new CunningPoint(411, 37), new CunningPoint(360, 25)), array(new CunningPoint(360, 25), new CunningPoint(344, 21), new CunningPoint(329, 20), new CunningPoint(315, 20)), array(new CunningPoint(372, 303), new CunningPoint(390, 387), new CunningPoint(371, 555), new CunningPoint(272, 591)), 
-				array(new CunningPoint(372, 303), new CunningPoint(390, 387), new CunningPoint(371, 555), new CunningPoint(272, 591)), array(new CunningPoint(272, 591), new CunningPoint(174, 628), new CunningPoint(155, 454), new CunningPoint(192, 404)), array(new CunningPoint(192, 404), new CunningPoint(244, 333), new CunningPoint(298, 299), new CunningPoint(372, 303))
+				array(new Point(195, 0), new Point(163, 0), new Point(133, 9), new Point(107, 27)), array(new Point(107, 27), new Point(71, 53), new Point(60, 162), new Point(60, 162)), array(new Point(60, 162), new Point(73, 177), new Point(95, 212), new Point(95, 212)), array(new Point(95, 212), new Point(95, 212), new Point(104, 99), new Point(129, 72)), 
+				array(new Point(95, 212), new Point(95, 212), new Point(104, 99), new Point(129, 72)), array(new Point(129, 72), new Point(161, 31), new Point(207, 26), new Point(262, 74)), array(new Point(262, 74), new Point(300, 130), new Point(277, 185), new Point(245, 228)), array(new Point(245, 228), new Point(209, 277), new Point(151, 274), new Point(105, 287)), 
+				array(new Point(245, 228), new Point(209, 277), new Point(151, 274), new Point(105, 287)), array(new Point(105, 287), new Point(9, 326), new Point(0, 444), new Point(23, 521)), array(new Point(23, 521), new Point(32, 562), new Point(53, 590), new Point(90, 601)), array(new Point(90, 601), new Point(150, 618), new Point(193, 601), new Point(225, 563)), 
+				array(new Point(90, 601), new Point(150, 618), new Point(193, 601), new Point(225, 563)), array(new Point(225, 563), new Point(231, 590), new Point(232, 620), new Point(258, 626)), array(new Point(258, 626), new Point(298, 634), new Point(351, 628), new Point(312, 589)), array(new Point(312, 589), new Point(273, 551), new Point(283, 535), new Point(281, 510)), 
+				array(new Point(312, 589), new Point(273, 551), new Point(283, 535), new Point(281, 510)), array(new Point(335, 71), new Point(339, 43), new Point(291, 17), new Point(240, 5)), array(new Point(240, 5), new Point(224, 1), new Point(209, 0), new Point(195, 0)), array(new Point(252, 283), new Point(270, 367), new Point(251, 535), new Point(152, 571)), 
+				array(new Point(252, 283), new Point(270, 367), new Point(251, 535), new Point(152, 571)), array(new Point(152, 571), new Point(54, 608), new Point(35, 434), new Point(72, 384)), array(new Point(72, 384), new Point(124, 313), new Point(178, 279), new Point(252, 283))
 			),
 			'lines' => array(
-				array(new CunningPoint(401, 530), new CunningPoint(455, 91)), array(new CunningPoint(315, 20), new CunningPoint(315, 20)), array(new CunningPoint(372, 303), new CunningPoint(372, 303))
-			)
-		);
-		break;
-	case 'H':
-		$this->glyphdata = array(
+				array(new Point(281, 510), new Point(335, 71)), array(new Point(195, 0), new Point(195, 0)), array(new Point(252, 283), new Point(252, 283))
+		))
+	),
+	'H' => array(
+		'width' => 420,
+		'height' => 550,
+		'glyph_data' => array(
 			'lines' => array(
-				array(new CunningPoint(115, 172), new CunningPoint(115, 207)), array(new CunningPoint(115, 207), new CunningPoint(170, 207)), array(new CunningPoint(170, 207), new CunningPoint(170, 692)), array(new CunningPoint(170, 692), new CunningPoint(115, 692)), 
-				array(new CunningPoint(170, 692), new CunningPoint(115, 692)), array(new CunningPoint(115, 692), new CunningPoint(115, 722)), array(new CunningPoint(115, 722), new CunningPoint(265, 722)), array(new CunningPoint(265, 722), new CunningPoint(265, 692)), 
-				array(new CunningPoint(265, 722), new CunningPoint(265, 692)), array(new CunningPoint(265, 692), new CunningPoint(210, 692)), array(new CunningPoint(210, 692), new CunningPoint(210, 442)), array(new CunningPoint(210, 442), new CunningPoint(440, 442)), 
-				array(new CunningPoint(210, 442), new CunningPoint(440, 442)), array(new CunningPoint(440, 442), new CunningPoint(440, 692)), array(new CunningPoint(440, 692), new CunningPoint(380, 692)), array(new CunningPoint(380, 692), new CunningPoint(380, 722)), 
-				array(new CunningPoint(380, 692), new CunningPoint(380, 722)), array(new CunningPoint(380, 722), new CunningPoint(535, 722)), array(new CunningPoint(535, 722), new CunningPoint(535, 692)), array(new CunningPoint(535, 692), new CunningPoint(485, 692)), 
-				array(new CunningPoint(535, 692), new CunningPoint(485, 692)), array(new CunningPoint(485, 692), new CunningPoint(485, 207)), array(new CunningPoint(485, 207), new CunningPoint(535, 207)), array(new CunningPoint(535, 207), new CunningPoint(535, 172)), 
-				array(new CunningPoint(535, 207), new CunningPoint(535, 172)), array(new CunningPoint(535, 172), new CunningPoint(380, 172)), array(new CunningPoint(380, 172), new CunningPoint(380, 207)), array(new CunningPoint(380, 207), new CunningPoint(440, 207)), 
-				array(new CunningPoint(380, 207), new CunningPoint(440, 207)), array(new CunningPoint(440, 207), new CunningPoint(440, 402)), array(new CunningPoint(440, 402), new CunningPoint(210, 402)), array(new CunningPoint(210, 402), new CunningPoint(210, 207)), 
-				array(new CunningPoint(210, 402), new CunningPoint(210, 207)), array(new CunningPoint(210, 207), new CunningPoint(265, 207)), array(new CunningPoint(265, 207), new CunningPoint(265, 172)), array(new CunningPoint(265, 172), new CunningPoint(115, 172))
-				array(new CunningPoint(265, 172), new CunningPoint(115, 172))
-			)
-		);
-		break;
-	case 'k2':
-		$this->glyphdata = array(
+				array(new Point(0, 0), new Point(0, 35)), array(new Point(0, 35), new Point(55, 35)), array(new Point(55, 35), new Point(55, 520)), array(new Point(55, 520), new Point(0, 520)), 
+				array(new Point(55, 520), new Point(0, 520)), array(new Point(0, 520), new Point(0, 550)), array(new Point(0, 550), new Point(150, 550)), array(new Point(150, 550), new Point(150, 520)), 
+				array(new Point(150, 550), new Point(150, 520)), array(new Point(150, 520), new Point(95, 520)), array(new Point(95, 520), new Point(95, 270)), array(new Point(95, 270), new Point(325, 270)), 
+				array(new Point(95, 270), new Point(325, 270)), array(new Point(325, 270), new Point(325, 520)), array(new Point(325, 520), new Point(265, 520)), array(new Point(265, 520), new Point(265, 550)), 
+				array(new Point(265, 520), new Point(265, 550)), array(new Point(265, 550), new Point(420, 550)), array(new Point(420, 550), new Point(420, 520)), array(new Point(420, 520), new Point(370, 520)), 
+				array(new Point(420, 520), new Point(370, 520)), array(new Point(370, 520), new Point(370, 35)), array(new Point(370, 35), new Point(420, 35)), array(new Point(420, 35), new Point(420, 0)), 
+				array(new Point(420, 35), new Point(420, 0)), array(new Point(420, 0), new Point(265, 0)), array(new Point(265, 0), new Point(265, 35)), array(new Point(265, 35), new Point(325, 35)), 
+				array(new Point(265, 35), new Point(325, 35)), array(new Point(325, 35), new Point(325, 230)), array(new Point(325, 230), new Point(95, 230)), array(new Point(95, 230), new Point(95, 35)), 
+				array(new Point(95, 230), new Point(95, 35)), array(new Point(95, 35), new Point(150, 35)), array(new Point(150, 35), new Point(150, 0)), array(new Point(150, 0), new Point(0, 0))
+				array(new Point(150, 0), new Point(0, 0))
+		))
+	),
+	'k' => array(
+		'width' => 420,
+		'height' => 680,
+		'glyph_data' => array(
 			'lines' => array(
-				array(new CunningPoint(170, 192), new CunningPoint(230, 192)), array(new CunningPoint(230, 192), new CunningPoint(230, 682)), array(new CunningPoint(230, 682), new CunningPoint(520, 472)), array(new CunningPoint(520, 472), new CunningPoint(590, 472)), 
-				array(new CunningPoint(520, 472), new CunningPoint(590, 472)), array(new CunningPoint(590, 472), new CunningPoint(380, 632)), array(new CunningPoint(380, 632), new CunningPoint(590, 872)), array(new CunningPoint(590, 872), new CunningPoint(520, 872)), 
-				array(new CunningPoint(590, 872), new CunningPoint(520, 872)), array(new CunningPoint(520, 872), new CunningPoint(340, 662)), array(new CunningPoint(340, 662), new CunningPoint(230, 742)), array(new CunningPoint(230, 742), new CunningPoint(230, 872)), 
-				array(new CunningPoint(230, 742), new CunningPoint(230, 872)), array(new CunningPoint(230, 872), new CunningPoint(170, 872)), array(new CunningPoint(170, 872), new CunningPoint(170, 192))
-			)
-		);
-		break;
-	case 'i':
-		$this->glyphdata = array(
-			'lines' => array(
-				array(new CunningPoint(300, 379), new CunningPoint(300, 852)), array(new CunningPoint(300, 852), new CunningPoint(373, 852)), array(new CunningPoint(373, 852), new CunningPoint(373, 379)), array(new CunningPoint(373, 379), new CunningPoint(300, 379)), 
-				array(new CunningPoint(373, 379), new CunningPoint(300, 379)), array(new CunningPoint(344, 166), new CunningPoint(344, 166))
-			),
+				array(new Point(0, 0), new Point(60, 0)), array(new Point(60, 0), new Point(60, 490)), array(new Point(60, 490), new Point(350, 280)), array(new Point(350, 280), new Point(420, 280)), 
+				array(new Point(350, 280), new Point(420, 280)), array(new Point(420, 280), new Point(210, 440)), array(new Point(210, 440), new Point(420, 680)), array(new Point(420, 680), new Point(350, 680)), 
+				array(new Point(420, 680), new Point(350, 680)), array(new Point(350, 680), new Point(170, 470)), array(new Point(170, 470), new Point(60, 550)), array(new Point(60, 550), new Point(60, 680)), 
+				array(new Point(60, 550), new Point(60, 680)), array(new Point(60, 680), new Point(0, 680)), array(new Point(0, 680), new Point(0, 0))
+		))
+	),
+	'i' => array(
+		'width' => 122,
+		'height' => 687,
+		'glyph_data' => array(
 			'cubic_splines' => array(
-				array(new CunningPoint(344, 166), new CunningPoint(325, 165), new CunningPoint(305, 179), new CunningPoint(294, 194)), array(new CunningPoint(294, 194), new CunningPoint(283, 210), new CunningPoint(277, 232), new CunningPoint(284, 250)), array(new CunningPoint(284, 250), new CunningPoint(291, 272), new CunningPoint(314, 293), new CunningPoint(337, 295)), array(new CunningPoint(337, 295), new CunningPoint(356, 296), new CunningPoint(376, 282), new CunningPoint(386, 265)), 
-				array(new CunningPoint(337, 295), new CunningPoint(356, 296), new CunningPoint(376, 282), new CunningPoint(386, 265)), array(new CunningPoint(386, 265), new CunningPoint(397, 247), new CunningPoint(399, 221), new CunningPoint(390, 202)), array(new CunningPoint(390, 202), new CunningPoint(382, 184), new CunningPoint(363, 168), new CunningPoint(344, 166))
-			)
-		);
-		break;
-	case 'f':
-		$this->glyphdata = array(
-			'cubic_splines' => array(
-				array(new CunningPoint(450, 132), new CunningPoint(450, 132), new CunningPoint(377, 132), new CunningPoint(348, 143)), array(new CunningPoint(348, 143), new CunningPoint(316, 156), new CunningPoint(294, 180), new CunningPoint(280, 212)), array(new CunningPoint(280, 212), new CunningPoint(267, 240), new CunningPoint(270, 302), new CunningPoint(270, 302)), array(new CunningPoint(300, 302), new CunningPoint(300, 302), new CunningPoint(297, 248), new CunningPoint(307, 223)), 
-				array(new CunningPoint(300, 302), new CunningPoint(300, 302), new CunningPoint(297, 248), new CunningPoint(307, 223)), array(new CunningPoint(307, 223), new CunningPoint(316, 200), new CunningPoint(356, 180), new CunningPoint(380, 172)), array(new CunningPoint(380, 172), new CunningPoint(407, 163), new CunningPoint(450, 182), new CunningPoint(450, 182))
+				array(new Point(67, 1), new Point(48, 0), new Point(28, 14), new Point(17, 29)), array(new Point(17, 29), new Point(6, 45), new Point(0, 67), new Point(7, 85)), array(new Point(7, 85), new Point(14, 107), new Point(37, 128), new Point(60, 130)), array(new Point(60, 130), new Point(79, 131), new Point(99, 117), new Point(109, 100)), 
+				array(new Point(60, 130), new Point(79, 131), new Point(99, 117), new Point(109, 100)), array(new Point(109, 100), new Point(120, 82), new Point(122, 56), new Point(113, 37)), array(new Point(113, 37), new Point(105, 19), new Point(86, 3), new Point(67, 1))
 			),
 			'lines' => array(
-				array(new CunningPoint(450, 182), new CunningPoint(450, 132)), array(new CunningPoint(270, 302), new CunningPoint(210, 302)), array(new CunningPoint(210, 302), new CunningPoint(210, 332)), array(new CunningPoint(210, 332), new CunningPoint(270, 332)), 
-				array(new CunningPoint(210, 332), new CunningPoint(270, 332)), array(new CunningPoint(270, 332), new CunningPoint(270, 702)), array(new CunningPoint(270, 702), new CunningPoint(210, 702)), array(new CunningPoint(210, 702), new CunningPoint(210, 732)), 
-				array(new CunningPoint(210, 702), new CunningPoint(210, 732)), array(new CunningPoint(210, 732), new CunningPoint(340, 732)), array(new CunningPoint(340, 732), new CunningPoint(360, 702)), array(new CunningPoint(360, 702), new CunningPoint(300, 702)), 
-				array(new CunningPoint(360, 702), new CunningPoint(300, 702)), array(new CunningPoint(300, 702), new CunningPoint(300, 332)), array(new CunningPoint(300, 332), new CunningPoint(360, 332)), array(new CunningPoint(360, 332), new CunningPoint(360, 302)), 
-				array(new CunningPoint(360, 332), new CunningPoint(360, 302)), array(new CunningPoint(360, 302), new CunningPoint(300, 302)), array(new CunningPoint(450, 182), new CunningPoint(450, 182))
-			)
-		);
-		break;
-	case 'b':
-		$this->glyphdata = array(
+				array(new Point(23, 214), new Point(23, 687)), array(new Point(23, 687), new Point(96, 687)), array(new Point(96, 687), new Point(96, 214)), array(new Point(96, 214), new Point(23, 214)), 
+				array(new Point(96, 214), new Point(23, 214)), array(new Point(67, 1), new Point(67, 1))
+		))
+	),
+	'f' => array(
+		'width' => 240,
+		'height' => 600,
+		'glyph_data' => array(
 			'cubic_splines' => array(
-				array(new CunningPoint(237, 275), new CunningPoint(233, 288), new CunningPoint(232, 295), new CunningPoint(231, 301)), array(new CunningPoint(231, 301), new CunningPoint(194, 577), new CunningPoint(199, 713), new CunningPoint(199, 713)), array(new CunningPoint(199, 713), new CunningPoint(199, 713), new CunningPoint(336, 729), new CunningPoint(382, 689)), array(new CunningPoint(382, 689), new CunningPoint(416, 660), new CunningPoint(431, 604), new CunningPoint(418, 562)), 
-				array(new CunningPoint(382, 689), new CunningPoint(416, 660), new CunningPoint(431, 604), new CunningPoint(418, 562)), array(new CunningPoint(418, 562), new CunningPoint(407, 529), new CunningPoint(371, 496), new CunningPoint(335, 495)), array(new CunningPoint(335, 495), new CunningPoint(293, 495), new CunningPoint(234, 570), new CunningPoint(234, 570)), array(new CunningPoint(263, 580), new CunningPoint(263, 580), new CunningPoint(212, 648), new CunningPoint(232, 673)), 
-				array(new CunningPoint(263, 580), new CunningPoint(263, 580), new CunningPoint(212, 648), new CunningPoint(232, 673)), array(new CunningPoint(232, 673), new CunningPoint(258, 706), new CunningPoint(325, 691), new CunningPoint(355, 663)), array(new CunningPoint(355, 663), new CunningPoint(380, 641), new CunningPoint(383, 596), new CunningPoint(372, 564)), array(new CunningPoint(372, 564), new CunningPoint(366, 547), new CunningPoint(350, 528), new CunningPoint(332, 528)), 
-				array(new CunningPoint(372, 564), new CunningPoint(366, 547), new CunningPoint(350, 528), new CunningPoint(332, 528)), array(new CunningPoint(332, 528), new CunningPoint(303, 526), new CunningPoint(263, 580), new CunningPoint(263, 580))
+				array(new Point(240, 0), new Point(240, 0), new Point(167, 0), new Point(138, 11)), array(new Point(138, 11), new Point(106, 24), new Point(84, 48), new Point(70, 80)), array(new Point(70, 80), new Point(57, 108), new Point(60, 170), new Point(60, 170)), array(new Point(90, 170), new Point(90, 170), new Point(87, 116), new Point(97, 91)), 
+				array(new Point(90, 170), new Point(90, 170), new Point(87, 116), new Point(97, 91)), array(new Point(97, 91), new Point(106, 68), new Point(146, 48), new Point(170, 40)), array(new Point(170, 40), new Point(197, 31), new Point(240, 50), new Point(240, 50))
 			),
 			'lines' => array(
-				array(new CunningPoint(234, 570), new CunningPoint(279, 279)), array(new CunningPoint(279, 279), new CunningPoint(237, 275)), array(new CunningPoint(263, 580), new CunningPoint(263, 580))
-			)
-		);
-		break;
-	case 'n':
-		$this->glyphdata = array(
+				array(new Point(240, 50), new Point(240, 0)), array(new Point(60, 170), new Point(0, 170)), array(new Point(0, 170), new Point(0, 200)), array(new Point(0, 200), new Point(60, 200)), 
+				array(new Point(0, 200), new Point(60, 200)), array(new Point(60, 200), new Point(60, 570)), array(new Point(60, 570), new Point(0, 570)), array(new Point(0, 570), new Point(0, 600)), 
+				array(new Point(0, 570), new Point(0, 600)), array(new Point(0, 600), new Point(130, 600)), array(new Point(130, 600), new Point(150, 570)), array(new Point(150, 570), new Point(90, 570)), 
+				array(new Point(150, 570), new Point(90, 570)), array(new Point(90, 570), new Point(90, 200)), array(new Point(90, 200), new Point(150, 200)), array(new Point(150, 200), new Point(150, 170)), 
+				array(new Point(150, 200), new Point(150, 170)), array(new Point(150, 170), new Point(90, 170)), array(new Point(240, 50), new Point(240, 50))
+		))
+	),
+	'b' => array(
+		'width' => 237,
+		'height' => 454,
+		'glyph_data' => array(
 			'cubic_splines' => array(
-				array(new CunningPoint(251, 382), new CunningPoint(251, 382), new CunningPoint(286, 370), new CunningPoint(346, 371)), array(new CunningPoint(346, 371), new CunningPoint(407, 373), new CunningPoint(427, 385), new CunningPoint(444, 399)), array(new CunningPoint(444, 399), new CunningPoint(458, 411), new CunningPoint(480, 442), new CunningPoint(480, 442)), array(new CunningPoint(510, 442), new CunningPoint(510, 442), new CunningPoint(501, 403), new CunningPoint(480, 382)), 
-				array(new CunningPoint(510, 442), new CunningPoint(510, 442), new CunningPoint(501, 403), new CunningPoint(480, 382)), array(new CunningPoint(480, 382), new CunningPoint(450, 352), new CunningPoint(428, 347), new CunningPoint(360, 342)), array(new CunningPoint(360, 342), new CunningPoint(291, 337), new CunningPoint(250, 352), new CunningPoint(250, 352))
+				array(new Point(43, 0), new Point(39, 13), new Point(38, 20), new Point(37, 26)), array(new Point(37, 26), new Point(0, 302), new Point(5, 438), new Point(5, 438)), array(new Point(5, 438), new Point(5, 438), new Point(142, 454), new Point(188, 414)), array(new Point(188, 414), new Point(222, 385), new Point(237, 329), new Point(224, 287)), 
+				array(new Point(188, 414), new Point(222, 385), new Point(237, 329), new Point(224, 287)), array(new Point(224, 287), new Point(213, 254), new Point(177, 221), new Point(141, 220)), array(new Point(141, 220), new Point(99, 220), new Point(40, 295), new Point(40, 295)), array(new Point(69, 305), new Point(69, 305), new Point(18, 373), new Point(38, 398)), 
+				array(new Point(69, 305), new Point(69, 305), new Point(18, 373), new Point(38, 398)), array(new Point(38, 398), new Point(64, 431), new Point(131, 416), new Point(161, 388)), array(new Point(161, 388), new Point(186, 366), new Point(189, 321), new Point(178, 289)), array(new Point(178, 289), new Point(172, 272), new Point(156, 253), new Point(138, 253)), 
+				array(new Point(178, 289), new Point(172, 272), new Point(156, 253), new Point(138, 253)), array(new Point(138, 253), new Point(109, 251), new Point(69, 305), new Point(69, 305))
 			),
 			'lines' => array(
-				array(new CunningPoint(170, 332), new CunningPoint(170, 362)), array(new CunningPoint(170, 362), new CunningPoint(220, 362)), array(new CunningPoint(220, 362), new CunningPoint(220, 682)), array(new CunningPoint(220, 682), new CunningPoint(170, 682)), 
-				array(new CunningPoint(220, 682), new CunningPoint(170, 682)), array(new CunningPoint(170, 682), new CunningPoint(140, 712)), array(new CunningPoint(140, 712), new CunningPoint(300, 712)), array(new CunningPoint(300, 712), new CunningPoint(300, 682)), 
-				array(new CunningPoint(300, 712), new CunningPoint(300, 682)), array(new CunningPoint(300, 682), new CunningPoint(250, 682)), array(new CunningPoint(250, 682), new CunningPoint(251, 382)), array(new CunningPoint(480, 442), new CunningPoint(480, 682)), 
-				array(new CunningPoint(480, 442), new CunningPoint(480, 682)), array(new CunningPoint(480, 682), new CunningPoint(430, 682)), array(new CunningPoint(430, 682), new CunningPoint(430, 712)), array(new CunningPoint(430, 712), new CunningPoint(560, 712)), 
-				array(new CunningPoint(430, 712), new CunningPoint(560, 712)), array(new CunningPoint(560, 712), new CunningPoint(510, 682)), array(new CunningPoint(510, 682), new CunningPoint(510, 442)), array(new CunningPoint(250, 352), new CunningPoint(250, 332)), 
-				array(new CunningPoint(250, 352), new CunningPoint(250, 332)), array(new CunningPoint(250, 332), new CunningPoint(170, 332))
-			)
-		);
-		break;
-	case 'S':
-		$this->glyphdata = array(
+				array(new Point(40, 295), new Point(85, 4)), array(new Point(85, 4), new Point(43, 0)), array(new Point(69, 305), new Point(69, 305))
+		))
+	),
+	'n' => array(
+		'width' => 420,
+		'height' => 380,
+		'glyph_data' => array(
 			'cubic_splines' => array(
-				array(new CunningPoint(471, 504), new CunningPoint(434, 427), new CunningPoint(325, 402), new CunningPoint(283, 327)), array(new CunningPoint(283, 327), new CunningPoint(272, 306), new CunningPoint(262, 279), new CunningPoint(269, 256)), array(new CunningPoint(269, 256), new CunningPoint(276, 234), new CunningPoint(300, 220), new CunningPoint(319, 209)), array(new CunningPoint(319, 209), new CunningPoint(341, 196), new CunningPoint(366, 188), new CunningPoint(391, 186)), 
-				array(new CunningPoint(319, 209), new CunningPoint(341, 196), new CunningPoint(366, 188), new CunningPoint(391, 186)), array(new CunningPoint(391, 186), new CunningPoint(428, 182), new CunningPoint(472, 180), new CunningPoint(503, 201)), array(new CunningPoint(503, 201), new CunningPoint(519, 211), new CunningPoint(532, 266), new CunningPoint(531, 248)), array(new CunningPoint(530, 182), new CunningPoint(529, 159), new CunningPoint(538, 154), new CunningPoint(477, 153)), 
-				array(new CunningPoint(530, 182), new CunningPoint(529, 159), new CunningPoint(538, 154), new CunningPoint(477, 153)), array(new CunningPoint(477, 153), new CunningPoint(477, 153), new CunningPoint(345, 138), new CunningPoint(272, 196)), array(new CunningPoint(272, 196), new CunningPoint(200, 254), new CunningPoint(211, 307), new CunningPoint(223, 334)), array(new CunningPoint(223, 334), new CunningPoint(258, 415), new CunningPoint(367, 442), new CunningPoint(417, 515)), 
-				array(new CunningPoint(223, 334), new CunningPoint(258, 415), new CunningPoint(367, 442), new CunningPoint(417, 515)), array(new CunningPoint(417, 515), new CunningPoint(432, 538), new CunningPoint(440, 565), new CunningPoint(446, 592)), array(new CunningPoint(446, 592), new CunningPoint(454, 631), new CunningPoint(456, 671), new CunningPoint(451, 710)), array(new CunningPoint(451, 710), new CunningPoint(445, 747), new CunningPoint(449, 778), new CunningPoint(412, 817)), 
-				array(new CunningPoint(451, 710), new CunningPoint(445, 747), new CunningPoint(449, 778), new CunningPoint(412, 817)), array(new CunningPoint(412, 817), new CunningPoint(366, 865), new CunningPoint(268, 869), new CunningPoint(212, 833)), array(new CunningPoint(212, 833), new CunningPoint(190, 819), new CunningPoint(184, 742), new CunningPoint(185, 761)), array(new CunningPoint(187, 829), new CunningPoint(190, 883), new CunningPoint(251, 880), new CunningPoint(278, 880)), 
-				array(new CunningPoint(187, 829), new CunningPoint(190, 883), new CunningPoint(251, 880), new CunningPoint(278, 880)), array(new CunningPoint(278, 880), new CunningPoint(308, 879), new CunningPoint(337, 879), new CunningPoint(366, 879)), array(new CunningPoint(366, 879), new CunningPoint(419, 878), new CunningPoint(471, 802), new CunningPoint(491, 743)), array(new CunningPoint(491, 743), new CunningPoint(517, 668), new CunningPoint(506, 576), new CunningPoint(471, 504))
-				array(new CunningPoint(491, 743), new CunningPoint(517, 668), new CunningPoint(506, 576), new CunningPoint(471, 504))
+				array(new Point(111, 50), new Point(111, 50), new Point(146, 38), new Point(206, 39)), array(new Point(206, 39), new Point(267, 41), new Point(287, 53), new Point(304, 67)), array(new Point(304, 67), new Point(318, 79), new Point(340, 110), new Point(340, 110)), array(new Point(370, 110), new Point(370, 110), new Point(361, 71), new Point(340, 50)), 
+				array(new Point(370, 110), new Point(370, 110), new Point(361, 71), new Point(340, 50)), array(new Point(340, 50), new Point(310, 20), new Point(288, 15), new Point(220, 10)), array(new Point(220, 10), new Point(151, 5), new Point(110, 20), new Point(110, 20))
 			),
 			'lines' => array(
-				array(new CunningPoint(531, 248), new CunningPoint(530, 182)), array(new CunningPoint(185, 761), new CunningPoint(187, 829)), array(new CunningPoint(471, 504), new CunningPoint(471, 504))
-			)
-		);
-		break;
-	case 'X':
-		$this->glyphdata = array(
-			'lines' => array(
-				array(new CunningPoint(200, 322), new CunningPoint(320, 522)), array(new CunningPoint(320, 522), new CunningPoint(190, 712)), array(new CunningPoint(190, 712), new CunningPoint(230, 712)), array(new CunningPoint(230, 712), new CunningPoint(340, 542)), 
-				array(new CunningPoint(230, 712), new CunningPoint(340, 542)), array(new CunningPoint(340, 542), new CunningPoint(450, 722)), array(new CunningPoint(450, 722), new CunningPoint(490, 722)), array(new CunningPoint(490, 722), new CunningPoint(360, 512)), 
-				array(new CunningPoint(490, 722), new CunningPoint(360, 512)), array(new CunningPoint(360, 512), new CunningPoint(486, 322)), array(new CunningPoint(486, 322), new CunningPoint(450, 322)), array(new CunningPoint(450, 322), new CunningPoint(340, 492)), 
-				array(new CunningPoint(450, 322), new CunningPoint(340, 492)), array(new CunningPoint(340, 492), new CunningPoint(240, 322)), array(new CunningPoint(240, 322), new CunningPoint(200, 322))
-			)
-		);
-		break;
-	case 'k':
-		$this->glyphdata = array(
+				array(new Point(30, 0), new Point(30, 30)), array(new Point(30, 30), new Point(80, 30)), array(new Point(80, 30), new Point(80, 350)), array(new Point(80, 350), new Point(30, 350)), 
+				array(new Point(80, 350), new Point(30, 350)), array(new Point(30, 350), new Point(0, 380)), array(new Point(0, 380), new Point(160, 380)), array(new Point(160, 380), new Point(160, 350)), 
+				array(new Point(160, 380), new Point(160, 350)), array(new Point(160, 350), new Point(110, 350)), array(new Point(110, 350), new Point(111, 50)), array(new Point(340, 110), new Point(340, 350)), 
+				array(new Point(340, 110), new Point(340, 350)), array(new Point(340, 350), new Point(290, 350)), array(new Point(290, 350), new Point(290, 380)), array(new Point(290, 380), new Point(420, 380)), 
+				array(new Point(290, 380), new Point(420, 380)), array(new Point(420, 380), new Point(370, 350)), array(new Point(370, 350), new Point(370, 110)), array(new Point(110, 20), new Point(110, 0)), 
+				array(new Point(110, 20), new Point(110, 0)), array(new Point(110, 0), new Point(30, 0))
+		))
+	),
+	'S' => array(
+		'width' => 354,
+		'height' => 745,
+		'glyph_data' => array(
 			'cubic_splines' => array(
-				array(new CunningPoint(463, 532), new CunningPoint(463, 532), new CunningPoint(440, 584), new CunningPoint(421, 587)), array(new CunningPoint(421, 587), new CunningPoint(399, 591), new CunningPoint(390, 553), new CunningPoint(376, 536)), array(new CunningPoint(376, 536), new CunningPoint(363, 520), new CunningPoint(339, 492), new CunningPoint(343, 473)), array(new CunningPoint(343, 473), new CunningPoint(349, 435), new CunningPoint(387, 447), new CunningPoint(398, 410)), 
-				array(new CunningPoint(343, 473), new CunningPoint(349, 435), new CunningPoint(387, 447), new CunningPoint(398, 410)), array(new CunningPoint(398, 410), new CunningPoint(409, 378), new CunningPoint(431, 328), new CunningPoint(412, 300)), array(new CunningPoint(412, 300), new CunningPoint(400, 280), new CunningPoint(400, 277), new CunningPoint(377, 278)), array(new CunningPoint(377, 278), new CunningPoint(320, 281), new CunningPoint(188, 340), new CunningPoint(188, 340)), 
-				array(new CunningPoint(377, 278), new CunningPoint(320, 281), new CunningPoint(188, 340), new CunningPoint(188, 340)), array(new CunningPoint(335, 301), new CunningPoint(284, 311), new CunningPoint(202, 331), new CunningPoint(201, 377)), array(new CunningPoint(307, 435), new CunningPoint(341, 429), new CunningPoint(372, 401), new CunningPoint(387, 370)), array(new CunningPoint(387, 370), new CunningPoint(397, 352), new CunningPoint(404, 323), new CunningPoint(390, 307)), 
-				array(new CunningPoint(387, 370), new CunningPoint(397, 352), new CunningPoint(404, 323), new CunningPoint(390, 307)), array(new CunningPoint(390, 307), new CunningPoint(378, 293), new CunningPoint(353, 297), new CunningPoint(335, 301))
+				array(new Point(287, 366), new Point(250, 289), new Point(141, 264), new Point(99, 189)), array(new Point(99, 189), new Point(88, 168), new Point(78, 141), new Point(85, 118)), array(new Point(85, 118), new Point(92, 96), new Point(116, 82), new Point(135, 71)), array(new Point(135, 71), new Point(157, 58), new Point(182, 50), new Point(207, 48)), 
+				array(new Point(135, 71), new Point(157, 58), new Point(182, 50), new Point(207, 48)), array(new Point(207, 48), new Point(244, 44), new Point(288, 42), new Point(319, 63)), array(new Point(319, 63), new Point(335, 73), new Point(348, 128), new Point(347, 110)), array(new Point(346, 44), new Point(345, 21), new Point(354, 16), new Point(293, 15)), 
+				array(new Point(346, 44), new Point(345, 21), new Point(354, 16), new Point(293, 15)), array(new Point(293, 15), new Point(293, 15), new Point(161, 0), new Point(88, 58)), array(new Point(88, 58), new Point(16, 116), new Point(27, 169), new Point(39, 196)), array(new Point(39, 196), new Point(74, 277), new Point(183, 304), new Point(233, 377)), 
+				array(new Point(39, 196), new Point(74, 277), new Point(183, 304), new Point(233, 377)), array(new Point(233, 377), new Point(248, 400), new Point(256, 427), new Point(262, 454)), array(new Point(262, 454), new Point(270, 493), new Point(272, 533), new Point(267, 572)), array(new Point(267, 572), new Point(261, 609), new Point(265, 640), new Point(228, 679)), 
+				array(new Point(267, 572), new Point(261, 609), new Point(265, 640), new Point(228, 679)), array(new Point(228, 679), new Point(182, 727), new Point(84, 731), new Point(28, 695)), array(new Point(28, 695), new Point(6, 681), new Point(0, 604), new Point(1, 623)), array(new Point(3, 691), new Point(6, 745), new Point(67, 742), new Point(94, 742)), 
+				array(new Point(3, 691), new Point(6, 745), new Point(67, 742), new Point(94, 742)), array(new Point(94, 742), new Point(124, 741), new Point(153, 741), new Point(182, 741)), array(new Point(182, 741), new Point(235, 740), new Point(287, 664), new Point(307, 605)), array(new Point(307, 605), new Point(333, 530), new Point(322, 438), new Point(287, 366))
+				array(new Point(307, 605), new Point(333, 530), new Point(322, 438), new Point(287, 366))
 			),
 			'lines' => array(
-				array(new CunningPoint(141, 160), new CunningPoint(162, 166)), array(new CunningPoint(162, 166), new CunningPoint(163, 618)), array(new CunningPoint(163, 618), new CunningPoint(215, 605)), array(new CunningPoint(215, 605), new CunningPoint(221, 574)), 
-				array(new CunningPoint(215, 605), new CunningPoint(221, 574)), array(new CunningPoint(221, 574), new CunningPoint(187, 590)), array(new CunningPoint(187, 590), new CunningPoint(193, 477)), array(new CunningPoint(193, 477), new CunningPoint(317, 455)), 
-				array(new CunningPoint(193, 477), new CunningPoint(317, 455)), array(new CunningPoint(317, 455), new CunningPoint(317, 502)), array(new CunningPoint(317, 502), new CunningPoint(350, 545)), array(new CunningPoint(350, 545), new CunningPoint(414, 621)), 
-				array(new CunningPoint(350, 545), new CunningPoint(414, 621)), array(new CunningPoint(414, 621), new CunningPoint(448, 594)), array(new CunningPoint(448, 594), new CunningPoint(463, 532)), array(new CunningPoint(188, 340), new CunningPoint(186, 148)), 
-				array(new CunningPoint(188, 340), new CunningPoint(186, 148)), array(new CunningPoint(186, 148), new CunningPoint(142, 143)), array(new CunningPoint(142, 143), new CunningPoint(141, 160)), array(new CunningPoint(201, 377), new CunningPoint(200, 453)), 
-				array(new CunningPoint(201, 377), new CunningPoint(200, 453)), array(new CunningPoint(200, 453), new CunningPoint(307, 435)), array(new CunningPoint(335, 301), new CunningPoint(335, 301))
-			)
-		);
-		break;
-	case 'E':
-		$this->glyphdata = array(
+				array(new Point(347, 110), new Point(346, 44)), array(new Point(1, 623), new Point(3, 691)), array(new Point(287, 366), new Point(287, 366))
+		))
+	),
+	'X' => array(
+		'width' => 300,
+		'height' => 400,
+		'glyph_data' => array(
 			'lines' => array(
-				array(new CunningPoint(150, 202), new CunningPoint(150, 252)), array(new CunningPoint(150, 252), new CunningPoint(200, 252)), array(new CunningPoint(200, 252), new CunningPoint(200, 832)), array(new CunningPoint(200, 832), new CunningPoint(150, 832)), 
-				array(new CunningPoint(200, 832), new CunningPoint(150, 832)), array(new CunningPoint(150, 832), new CunningPoint(150, 882)), array(new CunningPoint(150, 882), new CunningPoint(520, 882)), array(new CunningPoint(520, 882), new CunningPoint(520, 752)), 
-				array(new CunningPoint(520, 882), new CunningPoint(520, 752)), array(new CunningPoint(520, 752), new CunningPoint(470, 752)), array(new CunningPoint(470, 752), new CunningPoint(470, 832)), array(new CunningPoint(470, 832), new CunningPoint(250, 832)), 
-				array(new CunningPoint(470, 832), new CunningPoint(250, 832)), array(new CunningPoint(250, 832), new CunningPoint(250, 562)), array(new CunningPoint(250, 562), new CunningPoint(430, 562)), array(new CunningPoint(430, 562), new CunningPoint(430, 512)), 
-				array(new CunningPoint(430, 562), new CunningPoint(430, 512)), array(new CunningPoint(430, 512), new CunningPoint(250, 512)), array(new CunningPoint(250, 512), new CunningPoint(250, 252)), array(new CunningPoint(250, 252), new CunningPoint(470, 252)), 
-				array(new CunningPoint(250, 252), new CunningPoint(470, 252)), array(new CunningPoint(470, 252), new CunningPoint(470, 332)), array(new CunningPoint(470, 332), new CunningPoint(520, 332)), array(new CunningPoint(520, 332), new CunningPoint(520, 202)), 
-				array(new CunningPoint(520, 332), new CunningPoint(520, 202)), array(new CunningPoint(520, 202), new CunningPoint(150, 202))
-			)
-		);
-		break;
-	case 'Q':
-		$this->glyphdata = array(
-			'lines' => array(
-				array(new CunningPoint(130, 722), new CunningPoint(200, 812)), array(new CunningPoint(200, 812), new CunningPoint(490, 812)), array(new CunningPoint(490, 812), new CunningPoint(540, 872)), array(new CunningPoint(540, 872), new CunningPoint(630, 872)), 
-				array(new CunningPoint(540, 872), new CunningPoint(630, 872)), array(new CunningPoint(630, 872), new CunningPoint(570, 802)), array(new CunningPoint(570, 802), new CunningPoint(640, 732)), array(new CunningPoint(640, 732), new CunningPoint(640, 342)), 
-				array(new CunningPoint(640, 732), new CunningPoint(640, 342)), array(new CunningPoint(640, 342), new CunningPoint(561, 274)), array(new CunningPoint(561, 274), new CunningPoint(200, 272)), array(new CunningPoint(200, 272), new CunningPoint(130, 342)), 
-				array(new CunningPoint(200, 272), new CunningPoint(130, 342)), array(new CunningPoint(130, 342), new CunningPoint(130, 722)), array(new CunningPoint(200, 712), new CunningPoint(240, 752)), array(new CunningPoint(240, 752), new CunningPoint(440, 752)), 
-				array(new CunningPoint(240, 752), new CunningPoint(440, 752)), array(new CunningPoint(440, 752), new CunningPoint(400, 692)), array(new CunningPoint(400, 692), new CunningPoint(490, 692)), array(new CunningPoint(490, 692), new CunningPoint(530, 752)), 
-				array(new CunningPoint(490, 692), new CunningPoint(530, 752)), array(new CunningPoint(530, 752), new CunningPoint(570, 702)), array(new CunningPoint(570, 702), new CunningPoint(570, 362)), array(new CunningPoint(570, 362), new CunningPoint(520, 322)), 
-				array(new CunningPoint(570, 362), new CunningPoint(520, 322)), array(new CunningPoint(520, 322), new CunningPoint(250, 322)), array(new CunningPoint(250, 322), new CunningPoint(200, 362))
-			),
+				array(new Point(10, 0), new Point(130, 200)), array(new Point(130, 200), new Point(0, 390)), array(new Point(0, 390), new Point(40, 390)), array(new Point(40, 390), new Point(150, 220)), 
+				array(new Point(40, 390), new Point(150, 220)), array(new Point(150, 220), new Point(260, 400)), array(new Point(260, 400), new Point(300, 400)), array(new Point(300, 400), new Point(170, 190)), 
+				array(new Point(300, 400), new Point(170, 190)), array(new Point(170, 190), new Point(296, 0)), array(new Point(296, 0), new Point(260, 0)), array(new Point(260, 0), new Point(150, 170)), 
+				array(new Point(260, 0), new Point(150, 170)), array(new Point(150, 170), new Point(50, 0)), array(new Point(50, 0), new Point(10, 0))
+		))
+	),
+	'k' => array(
+		'width' => 322,
+		'height' => 478,
+		'glyph_data' => array(
 			'cubic_splines' => array(
-				array(new CunningPoint(200, 362), new CunningPoint(198, 474), new CunningPoint(201, 680), new CunningPoint(200, 712))
-			)
-		);
-		break;
-	default:
-		break;
-}
+				array(new Point(322, 389), new Point(322, 389), new Point(299, 441), new Point(280, 444)), array(new Point(280, 444), new Point(258, 448), new Point(249, 410), new Point(235, 393)), array(new Point(235, 393), new Point(222, 377), new Point(198, 349), new Point(202, 330)), array(new Point(202, 330), new Point(208, 292), new Point(246, 304), new Point(257, 267)), 
+				array(new Point(202, 330), new Point(208, 292), new Point(246, 304), new Point(257, 267)), array(new Point(257, 267), new Point(268, 235), new Point(290, 185), new Point(271, 157)), array(new Point(271, 157), new Point(259, 137), new Point(259, 134), new Point(236, 135)), array(new Point(236, 135), new Point(179, 138), new Point(47, 197), new Point(47, 197)), 
+				array(new Point(236, 135), new Point(179, 138), new Point(47, 197), new Point(47, 197)), array(new Point(194, 158), new Point(143, 168), new Point(61, 188), new Point(60, 234)), array(new Point(166, 292), new Point(200, 286), new Point(231, 258), new Point(246, 227)), array(new Point(246, 227), new Point(256, 209), new Point(263, 180), new Point(249, 164)), 
+				array(new Point(246, 227), new Point(256, 209), new Point(263, 180), new Point(249, 164)), array(new Point(249, 164), new Point(237, 150), new Point(212, 154), new Point(194, 158))
+			),
+			'lines' => array(
+				array(new Point(0, 17), new Point(21, 23)), array(new Point(21, 23), new Point(22, 475)), array(new Point(22, 475), new Point(74, 462)), array(new Point(74, 462), new Point(80, 431)), 
+				array(new Point(74, 462), new Point(80, 431)), array(new Point(80, 431), new Point(46, 447)), array(new Point(46, 447), new Point(52, 334)), array(new Point(52, 334), new Point(176, 312)), 
+				array(new Point(52, 334), new Point(176, 312)), array(new Point(176, 312), new Point(176, 359)), array(new Point(176, 359), new Point(209, 402)), array(new Point(209, 402), new Point(273, 478)), 
+				array(new Point(209, 402), new Point(273, 478)), array(new Point(273, 478), new Point(307, 451)), array(new Point(307, 451), new Point(322, 389)), array(new Point(47, 197), new Point(45, 5)), 
+				array(new Point(47, 197), new Point(45, 5)), array(new Point(45, 5), new Point(1, 0)), array(new Point(1, 0), new Point(0, 17)), array(new Point(60, 234), new Point(59, 310)), 
+				array(new Point(60, 234), new Point(59, 310)), array(new Point(59, 310), new Point(166, 292)), array(new Point(194, 158), new Point(194, 158))
+		))
+	),
+	'E' => array(
+		'width' => 370,
+		'height' => 680,
+		'glyph_data' => array(
+			'lines' => array(
+				array(new Point(0, 0), new Point(0, 50)), array(new Point(0, 50), new Point(50, 50)), array(new Point(50, 50), new Point(50, 630)), array(new Point(50, 630), new Point(0, 630)), 
+				array(new Point(50, 630), new Point(0, 630)), array(new Point(0, 630), new Point(0, 680)), array(new Point(0, 680), new Point(370, 680)), array(new Point(370, 680), new Point(370, 550)), 
+				array(new Point(370, 680), new Point(370, 550)), array(new Point(370, 550), new Point(320, 550)), array(new Point(320, 550), new Point(320, 630)), array(new Point(320, 630), new Point(100, 630)), 
+				array(new Point(320, 630), new Point(100, 630)), array(new Point(100, 630), new Point(100, 360)), array(new Point(100, 360), new Point(280, 360)), array(new Point(280, 360), new Point(280, 310)), 
+				array(new Point(280, 360), new Point(280, 310)), array(new Point(280, 310), new Point(100, 310)), array(new Point(100, 310), new Point(100, 50)), array(new Point(100, 50), new Point(320, 50)), 
+				array(new Point(100, 50), new Point(320, 50)), array(new Point(320, 50), new Point(320, 130)), array(new Point(320, 130), new Point(370, 130)), array(new Point(370, 130), new Point(370, 0)), 
+				array(new Point(370, 130), new Point(370, 0)), array(new Point(370, 0), new Point(0, 0))
+		))
+	),
+	'Q' => array(
+		'width' => 510,
+		'height' => 600,
+		'glyph_data' => array(
+			'cubic_splines' => array(
+				array(new Point(70, 90), new Point(68, 202), new Point(71, 408), new Point(70, 440))
+			),
+			'lines' => array(
+				array(new Point(0, 450), new Point(70, 540)), array(new Point(70, 540), new Point(360, 540)), array(new Point(360, 540), new Point(410, 600)), array(new Point(410, 600), new Point(500, 600)), 
+				array(new Point(410, 600), new Point(500, 600)), array(new Point(500, 600), new Point(440, 530)), array(new Point(440, 530), new Point(510, 460)), array(new Point(510, 460), new Point(510, 70)), 
+				array(new Point(510, 460), new Point(510, 70)), array(new Point(510, 70), new Point(431, 2)), array(new Point(431, 2), new Point(70, 0)), array(new Point(70, 0), new Point(0, 70)), 
+				array(new Point(70, 0), new Point(0, 70)), array(new Point(0, 70), new Point(0, 450)), array(new Point(70, 440), new Point(110, 480)), array(new Point(110, 480), new Point(310, 480)), 
+				array(new Point(110, 480), new Point(310, 480)), array(new Point(310, 480), new Point(270, 420)), array(new Point(270, 420), new Point(360, 420)), array(new Point(360, 420), new Point(400, 480)), 
+				array(new Point(360, 420), new Point(400, 480)), array(new Point(400, 480), new Point(440, 430)), array(new Point(440, 430), new Point(440, 90)), array(new Point(440, 90), new Point(390, 50)), 
+				array(new Point(440, 90), new Point(390, 50)), array(new Point(390, 50), new Point(120, 50)), array(new Point(120, 50), new Point(70, 90))
+		))
+	),
+);
